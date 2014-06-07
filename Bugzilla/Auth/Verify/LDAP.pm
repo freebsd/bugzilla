@@ -109,7 +109,7 @@ sub check_credentials {
         }
 
     } else {
-        $params->{bz_username} = $username;
+        $params->{bz_username} = $username . '@freebsd.org';
     }
 
     $params->{realname}  ||= $user_entry->get_value("displayName");
