@@ -1677,7 +1677,7 @@ Miscellaneous Improvements
   <body> tag on Bugzilla pages to allow custom end-user CSS to explicitly affect
   Bugzilla.
 
-- Perl's path has been changed to a normal /usr/bin/perl from the original
+- Perl's path has been changed to a normal /usr/local/bin/perl from the original
   legacy "bonsaitools" path specifier.
 
 - A new "always-require-login" parameter allows administrators to require a

@@ -40,7 +40,7 @@ use constant LOCALCONFIG_VARS => (
     },
     {
         name    => 'webservergroup',
-        default => ON_WINDOWS ? '' : 'apache',
+        default => ON_WINDOWS ? '' : 'www',
     },
     {
         name    => 'use_suexec',

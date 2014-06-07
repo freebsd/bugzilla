@@ -1050,11 +1050,11 @@ SetEnv LD_LIBRARY_PATH /u01/app/oracle/product/10.2.0/lib/
                 of your Bugzilla installation. (If such a section does not
                 exist, you'll want to add one.) In this example, Bugzilla has
                 been installed at 
-                <filename class="directory">/var/www/html/bugzilla</filename>.
+                <filename class="directory">/usr/local/www/bugzilla</filename>.
                 </para>
     
                 <programlisting>
-&lt;Directory /var/www/html/bugzilla&gt;
+&lt;Directory /usr/local/www/bugzilla&gt;
 AddHandler cgi-script .cgi
 Options +ExecCGI
 DirectoryIndex index.cgi index.html
@@ -1158,7 +1158,7 @@ AllowOverride Limit FileInfo Indexes Options
 
                 <programlisting>
 PerlSwitches -w -T
-PerlConfigRequire /var/www/html/bugzilla/mod_perl.pl
+PerlConfigRequire /usr/local/www/bugzilla/mod_perl.pl
                 </programlisting>
             </step>
 			
@@ -1624,7 +1624,7 @@ C:\perl&gt; <command>ppm install &lt;module name&gt;</command>
 
         <note>
           <para>
-            The web server looks at <filename>/usr/bin/perl</filename> to
+            The web server looks at <filename>/usr/local/bin/perl</filename> to
             call Perl. If you are using Apache on windows, you can set the
             <ulink url="http://httpd.apache.org/docs-2.0/mod/core.html#scriptinterpretersource">ScriptInterpreterSource</ulink>
             directive in your Apache config file to make it look at the
@@ -2010,7 +2010,7 @@ chmod o+x . data data/webdot
         user were updating to version 4.2.1, but the procedures are the
         same no matter what version you're updating to. Also, in the
         examples, the user's Bugzilla installation is found at
-        <filename>/var/www/html/bugzilla</filename>. If that is not the
+        <filename>/usr/local/www/bugzilla</filename>. If that is not the
         same as the location of your Bugzilla installation, simply
         substitute the proper paths where appropriate.
       </para>
@@ -2192,7 +2192,7 @@ chmod o+x . data data/webdot
         </warning>
 
         <programlisting>
-bash$ <command>cd /var/www/html/bugzilla</command>
+bash$ <command>cd /usr/local/www/bugzilla</command>
 bash$ <command>bzr switch 4.2</command> (only run this command when not yet running 4.2)
 bash$ <command>bzr up -r tag:bugzilla-4.2.1</command>
 +N  extensions/MoreBugUrl/
@@ -2300,7 +2300,7 @@ bash$ <command>mv bugzilla-4.2.1 bugzilla</command>
         </para>
 
         <programlisting>
-bash$ <command>cd /var/www/html/bugzilla</command>
+bash$ <command>cd /usr/local/www/bugzilla</command>
 bash$ <command>wget http://ftp.mozilla.org/pub/mozilla.org/webtools/bugzilla-4.2-to-4.2.1.diff.gz</command>
 <emphasis>(Output omitted)</emphasis>
 bash$ <command>gunzip bugzilla-4.2-to-4.2.1.diff.gz</command>
@@ -2361,7 +2361,7 @@ patching file enter_bug.cgi
           </para>
 
           <programlisting>
-bash$ <command>cd /var/www/html/bugzilla</command>
+bash$ <command>cd /usr/local/www/bugzilla</command>
 bash$ <command>./checksetup.pl</command>
           </programlisting>
 

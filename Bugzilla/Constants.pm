@@ -362,7 +362,7 @@ use constant ADMIN_GROUP_NAME => 'admin';
 use constant PER_PRODUCT_PRIVILEGES => ('editcomponents', 'editbugs', 'canconfirm');
 
 # Path to sendmail.exe (Windows only)
-use constant SENDMAIL_EXE => '/usr/lib/sendmail.exe';
+use constant SENDMAIL_EXE => '/usr/sbin/sendmail.exe';
 # Paths to search for the sendmail binary (non-Windows)
 use constant SENDMAIL_PATH => '/usr/lib:/usr/sbin:/usr/ucblib';
 

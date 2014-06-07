@@ -50,7 +50,7 @@ foreach my $file (@testitems) {
             next;
         }
 
-        if ($file_line1 =~ m#^\#\!/usr/bin/perl\s#) {
+        if ($file_line1 =~ m#^\#\!/usr/local/bin/perl\s#) {
             if ($file_line1 =~ m#\s-$flags#) {
                 ok(1,"$file uses standard perl location and -$flags");
             } else {

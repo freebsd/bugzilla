@@ -1,4 +1,4 @@
-#!/usr/bin/perl -wT
+#!/usr/local/bin/perl -wT
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -24,7 +24,7 @@ use strict;
 # after adding this alias to your aliases file. Make sure your sendmail
 # installation is configured to allow mail aliases to execute code.
 #
-# bugzilla-import: "|/usr/bin/perl /opt/bugzilla/importxml.pl"
+# bugzilla-import: "|/usr/local/bin/perl /opt/bugzilla/importxml.pl"
 #
 # Second it can be run from the command line with any xml file from
 # STDIN that conforms to the bugzilla DTD. In this case you can pass
@@ -1340,7 +1340,7 @@ XML doesn't exist.
      after adding this alias to your aliases file. Make sure your sendmail
      installation is configured to allow mail aliases to execute code. 
 
-     bugzilla-import: "|/usr/bin/perl /opt/bugzilla/importxml.pl --mail"
+     bugzilla-import: "|/usr/local/bin/perl /opt/bugzilla/importxml.pl --mail"
 
      Second it can be run from the command line with any xml file from 
      STDIN that conforms to the bugzilla DTD. In this case you can pass 

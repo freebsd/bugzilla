@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/local/bin/perl -w
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -27,7 +27,7 @@ my $mail_to = "root";
 #
 # mail transfer agent.  this should probably really be converted to a Param().
 #
-my $mta_program = "/usr/lib/sendmail -t -ODeliveryMode=deferred";
+my $mta_program = "/usr/sbin/sendmail -t -ODeliveryMode=deferred";
 
 # The array of long-running queries
 #
