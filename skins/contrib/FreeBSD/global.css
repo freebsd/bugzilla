@@ -1,0 +1,90 @@
+body {
+    font-family: Verdana, sans-serif;
+    background-color: #fff;
+}
+
+h1 {
+    color: #900;
+    font-size: 1.4em;
+}
+
+h2 {
+    color: #900;
+    font-size: 1.2em;
+}
+
+a {
+    color: #900;
+}
+a:visited {
+    color: #400;
+}
+
+#titles {
+    background-color: #900;
+}
+
+.links li a {
+    color: #666;
+    text-decoration: none;
+    font-weight: bold;
+}
+.links li a:hover {
+    color: #900;
+}
+#links-saved .links li a {
+    font-weight: normal;
+}
+
+#footer {
+    background-color: #eee;
+}
+
+form input {
+    border: 1px solid #DADADA;
+}
+form input[type="submit"] {
+    background-color: #eee;
+}
+
+select {
+    border: 1px solid #DADADA;
+}
+
+.fbsd_quick_actions {
+    margin-bottom: 2em;
+}
+.fbsd_quick_actions ul {
+    list-style-type: none;
+}
+.fbsd_quick_actions ul li {
+    margin-bottom: .5em;
+}
+
+.fbsd_quick_actions ul li a {
+    font-weight: bold;
+    text-decoration: none;
+}
+.fbsd_quick_actions ul li a:visited {
+    color: #900;
+}
+
+#query, #account, #enter_bug {
+    background: none;
+}
+
+/**
+ * The bugzilla authors use a table to align a button on several forms
+ * within the preferences - we can't simply format tables our way...
+ */
+/*
+table {
+    background-color: #EEE;
+    border-spacing: 0px;
+    border-width: 1px 1px 0px;
+    border-style: solid solid none;
+    border-color: #CACACA #CACACA;
+    border-image: none;
+    border-collapse: collapse;
+}
+*/
