@@ -85,21 +85,35 @@ sub bug_end_of_create {
     # If there is only one person, assign that person, otherwise
     # set all into CC
     if (REASSIGN == 1 && scalar(@foundports) == 1) {
-        my $user = _get_maintainer($foundports[0]);
-        my $name = $user->login;
-        if ($user) {
+        my ($maintainer, $user) = _get_maintainer($foundports[0]);
+        if (!$user) {
+            warn("Could not find maintainer for $foundports[0]");
+            return;
+        }
+
+        if (Bugzilla->user->id == $user->id) {
+            # It's a maintainer update, do not assign to the issuer, but
+            # update the status
+            _update_status(
+                $bug,
+                new Bugzilla::Status({ name => "Patch Ready" })
+                );
+            return;
+        } else {
+            my $name = $user->login;
             $bug->set_assigned_to($user);
             # TODO: set to feedback, once it's there
+            # _update_status(
+            #     $bug,
+            #     new Bugzilla::Status({ name => "Feedback Required" })
+            #     );
             _add_comment($bug, "auto-assigned to maintainer $name");
-        } else {
-            warn("Could not find maintainer for $foundports[0]");
         }
     } else {
         my $someoneccd = 0;
         foreach my $port (@foundports) {
             my $user = _get_maintainer($port);
             if ($user) {
-                # TODO: filter already added users
                 $bug->add_cc($user);
                 $someoneccd = 1;
             } else {
@@ -129,6 +143,19 @@ sub _add_comment {
     }
 }
 
+sub _update_status {
+    my ($bug, $status) = @_;
+    my $autoid = login_to_id(UID_AUTOASSIGN);
+    if ($autoid) {
+        my $curuser = Bugzilla->user;
+        Bugzilla->set_user(new Bugzilla::User($autoid));
+        $bug->set_bug_status($status);
+        Bugzilla->set_user($curuser);
+    } else {
+        warn("configured auto-assign user missing!")
+    }
+}
+
 sub _get_maintainer {
     # we expect _get_maintainer("category/port")
     my $port = shift;
@@ -143,9 +170,14 @@ sub _get_maintainer {
         $ENV{PATH} = $oldenv;
         chomp($maintainer);
         if ($maintainer) {
+            # Do not bother ports@FreeBSD.org
+            if (lc($maintainer) eq "ports\@freebsd.org") {
+                warn("$port ignored, maintainer is ports\@FreeBSD.org");
+                return;
+            }
             my $uid = login_to_id($maintainer);
             if ($uid) {
-                return new Bugzilla::User($uid);
+                return ($maintainer, new Bugzilla::User($uid));
             }
         }
     }
