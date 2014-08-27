@@ -92,21 +92,22 @@ sub bug_end_of_create {
         }
 
         if (Bugzilla->user->id == $user->id) {
-            # It's a maintainer update, do not assign to the issuer, but
-            # update the status
-            _update_status(
-                $bug,
-                new Bugzilla::Status({ name => "Patch Ready" })
-                );
+            # TODO: maintainer-updates should only be moved automatically
+            # to Patch Ready, if it is proven that the maintainer patches
+            # match the basic quality requirements
+            #
+            # _update_status(
+            #     $bug,
+            #     new Bugzilla::Status({ name => "Patch Ready" })
+            #     );
             return;
         } else {
             my $name = $user->login;
             $bug->set_assigned_to($user);
-            # TODO: set to feedback, once it's there
-            # _update_status(
-            #     $bug,
-            #     new Bugzilla::Status({ name => "Feedback Required" })
-            #     );
+            _update_status(
+                $bug,
+                new Bugzilla::Status({ name => "Feedback Needed" })
+                );
             _add_comment($bug, "auto-assigned to maintainer $name");
         }
     } else {
