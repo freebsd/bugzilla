@@ -36,8 +36,18 @@ a:visited {
     font-weight: normal;
 }
 
+#header .links {
+    background-color: #eee;
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    border-radius: 5px;
+}
+
 #footer {
     background-color: #eee;
+    border: 1px solid #ddd;
+    border-radius: 5px;
 }
 
 form input {
