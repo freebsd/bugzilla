@@ -1,6 +1,6 @@
 body {
     font-family: Verdana, sans-serif;
-    background-color: #fff;
+    background-image: none;
 }
 
 h1 {
@@ -18,6 +18,9 @@ a {
 }
 a:visited {
     color: #400;
+}
+a:hover {
+    color: #000;
 }
 
 #titles {
@@ -77,6 +80,9 @@ select {
 }
 .fbsd_quick_actions ul li a:visited {
     color: #900;
+}
+.fbsd_quick_actions ul li a:hover {
+    color: #000;
 }
 
 #query, #account, #enter_bug {
