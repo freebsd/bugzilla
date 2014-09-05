@@ -25,6 +25,33 @@ use constant {
 
 our $VERSION = '0.1.0';
 
+sub install_update_db {
+    my ($self, $args) = @_;
+    my $dbh = Bugzilla->dbh;
+
+    if (@{ Bugzilla::FlagType::match({ name => 'maintainer-feedback' }) }) {
+        return;
+    }
+
+    print("Creating maintainer-feedback flag ...\n");
+
+    my $flagtype = Bugzilla::FlagType->create({
+        name        => 'maintainer-feedback',
+        description => "Set this flag, if you want to request information from the maintainer",
+        target_type => 'bug',
+        cc_list     => '',
+        sortkey     => 1,
+        is_active   => 1,
+        is_requestable   => 1,
+        is_requesteeble  => 1,
+        is_multiplicable => 0,
+        request_group    => '',
+        grant_group      => '',
+        inclusions       => [],
+        exclusions       => ['0:0'],
+    });
+}
+
 sub bug_end_of_create {
     my ($self, $args) = @_;
     my $bug = $args->{'bug'};
