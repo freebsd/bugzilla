@@ -1,19 +1,23 @@
 package Bugzilla::Extension::AutoAssign;
+
 use strict;
 use warnings;
+
 use base qw(Bugzilla::Extension);
 
 use Data::Dumper;
 
 use Bugzilla::Comment;
 use Bugzilla::Field;
+use Bugzilla::FlagType;
+use Bugzilla::Flag;
 use Bugzilla::User;
 
 use constant {
     PORTSDIR => "/usr/ports",
     INDEX => "INDEX",
     # Needs to be changed to an internal user
-    UID_AUTOASSIGN => "bugzilla\@FreeBSD.org",
+    UID_AUTOASSIGN => "bugmeister\@FreeBSD.org",
     # We want a comment about the automatic action
     AUTOCOMMENT => 1,
     REASSIGN => 1
@@ -37,7 +41,7 @@ sub bug_end_of_create {
     # Is it a port patch in summary matching ([A-Za-z0-9_-]/[A-Za-z0-9_-])?
     my @res = ($bug->short_desc =~ /([\w-]+\/[\w-]+)/g);
     if (@res && scalar(@res) > 0) {
-        warn("Found ports in summary: @res");
+        # warn("Found ports in summary: @res");
         push(@foundports, @res);
     }
     # Remove duplicate entries.
@@ -59,57 +63,50 @@ sub bug_end_of_create {
     %hashed = map{$_, 1} @foundports;
     @foundports = keys(%hashed);
 
-    # UNUSED FOR NOW - a different workflow is needed for cf_ports_affected
-    #
-    # # Sync with the cf_ports_affected list. cf_ports_affected in a
-    # # comma-separated list of <cat>/<port> entries.
-    # #
-    # # Users can't set the field on initial creation, but in case,
-    # # the behaviour is changed in bugzilla...
-    # my @newlyadded = ();
-    # my @affected = split(",", $bug->cf_ports_affected);
-    # %hashed = map{$_, 1} @affected;
-    # foreach my $port (@foundports) {
-    #     if (!exists($hashed{$port})) {
-    #         push(@affected, $port);
-    #         push(@newlyadded, $port);
-    #     }
-    # }
-    # # Store the new affected port list back to the cf_ field
-    # my $field = new Bugzilla::Field({ name => "cf_ports_affected"});
-    # if ($field) {
-    #     $bug->set_custom_field($field, join(",", @affected));
-    # }
+    my $flag_feedback;
+    my $flagtypes = Bugzilla::FlagType::match(
+        { name => 'maintainer-feedback' });
+    if (scalar(@$flagtypes) == 1) {
+        $flag_feedback = @{$flagtypes}[0];
+    }
 
-    # Add the maintainers of the affected ports to the CC.
-    # If there is only one person, assign that person, otherwise
-    # set all into CC
-    if (REASSIGN == 1 && scalar(@foundports) == 1) {
+    # Add the maintainers of the affected ports to the CC. If there is only
+    # one person, add a feedback request for that person and optionally assign
+    # (if it is a committer), otherwise set all into CC.
+    if (scalar(@foundports) == 1) {
         my ($maintainer, $user) = _get_maintainer($foundports[0]);
         if (!$user) {
-            warn("Could not find maintainer for $foundports[0]");
+            # warn("Could not find maintainer for $foundports[0]");
+            return;
+        }
+        if (!$user->is_enabled) {
+            # warn("Found maintainer is not enabled in Bugzilla");
+            return;
+        }
+        if (Bugzilla->user->id == $user->id) {
+            # Maintainer updates should not ask the user for feedback.
             return;
         }
 
-        if (Bugzilla->user->id == $user->id) {
-            # TODO: maintainer-updates should only be moved automatically
-            # to Patch Ready, if it is proven that the maintainer patches
-            # match the basic quality requirements
-            #
-            # _update_status(
-            #     $bug,
-            #     new Bugzilla::Status({ name => "Patch Ready" })
-            #     );
-            return;
+        if (!$flag_feedback) {
+            # warn("maintainer-feedback flag not found");
         } else {
-            my $name = $user->login;
-            $bug->set_assigned_to($user);
-            _update_status(
-                $bug,
-                new Bugzilla::Status({ name => "Feedback Needed" })
-                );
-            _add_comment($bug, "auto-assigned to maintainer $name");
+            my (@oldflags, @newflags);
+            push(@newflags, { type_id   => $flag_feedback->id,
+                              status    => "?",
+                              requestee => $user->login
+                 });
+            $bug->set_flags(\@oldflags, \@newflags);
         }
+        if (REASSIGN != 0 && $user->login =~ /\@freebsd\.org$/i) {
+            # It's a FreeBSD committer
+            $bug->set_assigned_to($user);
+            _add_comment($bug, "Auto-assigned to maintainer $user->login");
+        } else {
+            $bug->add_cc($user);
+            _add_comment($bug, "Maintainer CC'd");
+        }
+
     } else {
         my $someoneccd = 0;
         foreach my $port (@foundports) {
@@ -118,11 +115,11 @@ sub bug_end_of_create {
                 $bug->add_cc($user);
                 $someoneccd = 1;
             } else {
-                warn("Could not find maintainer for '$port'");
+                # warn("Could not find maintainer for '$port'");
             }
         }
         if ($someoneccd == 1) {
-            _add_comment($bug, "maintainers CC'd");
+            _add_comment($bug, "Maintainers CC'd");
         }
     }
 }
@@ -140,7 +137,7 @@ sub _add_comment {
         $bug->add_comment($comment);
         Bugzilla->set_user($curuser);
     } else {
-        warn("configured auto-assign user missing!")
+        # warn("configured auto-assign user missing!")
     }
 }
 
@@ -153,7 +150,7 @@ sub _update_status {
         $bug->set_bug_status($status);
         Bugzilla->set_user($curuser);
     } else {
-        warn("configured auto-assign user missing!")
+        # warn("configured auto-assign user missing!")
     }
 }
 
@@ -173,7 +170,7 @@ sub _get_maintainer {
         if ($maintainer) {
             # Do not bother ports@FreeBSD.org
             if (lc($maintainer) eq "ports\@freebsd.org") {
-                warn("$port ignored, maintainer is ports\@FreeBSD.org");
+                # warn("$port ignored, maintainer is ports\@FreeBSD.org");
                 return;
             }
             my $uid = login_to_id($maintainer);
