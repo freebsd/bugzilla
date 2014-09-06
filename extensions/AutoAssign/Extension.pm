@@ -5,8 +5,6 @@ use warnings;
 
 use base qw(Bugzilla::Extension);
 
-use Data::Dumper;
-
 use Bugzilla::Comment;
 use Bugzilla::Field;
 use Bugzilla::FlagType;
@@ -14,10 +12,10 @@ use Bugzilla::Flag;
 use Bugzilla::User;
 
 use constant {
-    PORTSDIR => "/usr/ports",
+    PORTSDIR => "/home/ports",
     INDEX => "INDEX",
     # Needs to be changed to an internal user
-    UID_AUTOASSIGN => "bugmeister\@FreeBSD.org",
+    UID_AUTOASSIGN => "bugzilla\@FreeBSD.org",
     # We want a comment about the automatic action
     AUTOCOMMENT => 1,
     REASSIGN => 1
@@ -28,6 +26,13 @@ our $VERSION = '0.1.0';
 sub install_update_db {
     my ($self, $args) = @_;
     my $dbh = Bugzilla->dbh;
+
+    print("Checking for ports directory... ");
+    if (-d PORTSDIR) {
+        print("found!\n");
+    } else {
+        print("NOT FOUND - please create it at " . PORTSDIR . "!\n");
+    }
 
     if (@{ Bugzilla::FlagType::match({ name => 'maintainer-feedback' }) }) {
         return;
@@ -47,8 +52,8 @@ sub install_update_db {
         is_multiplicable => 0,
         request_group    => '',
         grant_group      => '',
-        inclusions       => [],
-        exclusions       => ['0:0'],
+        inclusions       => ['0:0'],
+        exclusions       => [],
     });
 }
 
@@ -57,8 +62,6 @@ sub bug_end_of_create {
     my $bug = $args->{'bug'};
 
     # We only add CCs, if it is a individual port bug
-    #my $product = ;
-    #my $component = ;
     if ($bug->product ne "Ports Tree" ||
         $bug->component ne "Individual Port(s)") {
         return;
@@ -82,7 +85,7 @@ sub bug_end_of_create {
         my $first = $bug->comments->[0]->body;
         @res = ($first =~ /([\w-]+\/[\w-]+)/g);
         if (@res && scalar(@res) > 0) {
-            warn("Found ports in description: @res");
+            # warn("Found ports in description: @res");
             push(@foundports, @res);
         }
     }
@@ -107,7 +110,7 @@ sub bug_end_of_create {
             return;
         }
         if (!$user->is_enabled) {
-            # warn("Found maintainer is not enabled in Bugzilla");
+            warn("Found maintainer is not enabled in Bugzilla");
             return;
         }
         if (Bugzilla->user->id == $user->id) {
@@ -116,7 +119,7 @@ sub bug_end_of_create {
         }
 
         if (!$flag_feedback) {
-            # warn("maintainer-feedback flag not found");
+            warn("maintainer-feedback flag not found");
         } else {
             my (@oldflags, @newflags);
             push(@newflags, { type_id   => $flag_feedback->id,
@@ -125,15 +128,7 @@ sub bug_end_of_create {
                  });
             $bug->set_flags(\@oldflags, \@newflags);
         }
-        if (REASSIGN != 0 && $user->login =~ /\@freebsd\.org$/i) {
-            # It's a FreeBSD committer
-            $bug->set_assigned_to($user);
-            _add_comment($bug, "Auto-assigned to maintainer $user->login");
-        } else {
-            $bug->add_cc($user);
-            _add_comment($bug, "Maintainer CC'd");
-        }
-
+        _reassign_or_cc($bug, $user);
     } else {
         my $someoneccd = 0;
         foreach my $port (@foundports) {
@@ -151,6 +146,27 @@ sub bug_end_of_create {
     }
 }
 
+sub _reassign_or_cc {
+    my ($bug, $user) = @_;
+
+    my $autoid = login_to_id(UID_AUTOASSIGN);
+    # Do not do anything, if the user does not exist.
+    if ($autoid) {
+        my $curuser = Bugzilla->user;
+        Bugzilla->set_user(new Bugzilla::User($autoid));
+        if (REASSIGN != 0 && $user->login =~ /\@freebsd\.org$/i) {
+            $bug->set_assigned_to($user);
+            $bug->add_comment("Auto-assigned to maintainer $user->login");
+        } else {
+            $bug->add_cc($user);
+            $bug->add_comment("Maintainer CC'd");
+        }
+        Bugzilla->set_user($curuser);
+    } else {
+        warn("configured auto-assign user missing!")
+    }
+}
+
 sub _add_comment {
     my ($bug, $comment) = @_;
     if (AUTOCOMMENT == 0) {
@@ -164,7 +180,7 @@ sub _add_comment {
         $bug->add_comment($comment);
         Bugzilla->set_user($curuser);
     } else {
-        # warn("configured auto-assign user missing!")
+        warn("configured auto-assign user missing!")
     }
 }
 
@@ -177,7 +193,7 @@ sub _update_status {
         $bug->set_bug_status($status);
         Bugzilla->set_user($curuser);
     } else {
-        # warn("configured auto-assign user missing!")
+        warn("configured auto-assign user missing!")
     }
 }
 
