@@ -155,8 +155,9 @@ sub _reassign_or_cc {
         my $curuser = Bugzilla->user;
         Bugzilla->set_user(new Bugzilla::User($autoid));
         if (REASSIGN != 0 && $user->login =~ /\@freebsd\.org$/i) {
+            my $name = $user->login;
             $bug->set_assigned_to($user);
-            $bug->add_comment("Auto-assigned to maintainer $user->login");
+            $bug->add_comment("Auto-assigned to maintainer $name");
         } else {
             $bug->add_cc($user);
             $bug->add_comment("Maintainer CC'd");
@@ -221,6 +222,8 @@ sub _get_maintainer {
                 return ($maintainer, new Bugzilla::User($uid));
             }
         }
+    } else {
+        warn("Port directory $portdir not found");
     }
     return;
 }
