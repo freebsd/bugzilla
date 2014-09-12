@@ -8,10 +8,15 @@ use Bugzilla::Mailer;
 use Bugzilla::Constants;
 use Email::MIME;
 
+use constant {
+    # Do we want to inform users about flags requested?
+    QUERY_FLAGS => 0
+};
+
 my $MAIL = "
-From: bz-noreply\@FreeBSD.org
+From: bugzilla-noreply\@FreeBSD.org
 To: %s
-Subject: Problem reports assigned to %s that need special attention
+Subject: Problem reports for %s that need special attention
 
 To view an individual PR, use:
   https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=(Bug Id).
@@ -36,7 +41,7 @@ Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 my $dbh = Bugzilla->dbh;
 
 my $dnow = $dbh->sql_to_days("NOW()");
-my $query = q{
+my $bugquery = q{
 SELECT
   bugs.bug_id, bugs.short_desc, bugs.bug_status, p.login_name
 FROM
@@ -44,17 +49,31 @@ FROM
   JOIN bug_status bs ON (bs.value = bugs.bug_status AND bs.is_open != 0)
   JOIN profiles p ON (p.userid = bugs.assigned_to AND p.is_enabled = 1)
 WHERE
-  bugs.bug_status in (?, ?, ?, ?)
+  bugs.bug_status in (?, ?, ?)
   AND } . $dnow . " - " . $dbh->sql_to_days("bugs.delta_ts") . " >= " . $WAIT .
 " ORDER BY bugs.assigned_to, bugs.bug_status, bugs.bug_id;";
 
 my $openbugs = $dbh->selectall_arrayref(
-    $query,
+    $bugquery,
     undef,
     'Approval Needed',
-    'Feedback Needed',
     'Needs MFC',
     'Patch Ready');
+
+if (QUERY_FLAGS) {
+    my $reqquery = "
+SELECT
+  bugs.bug_id, bugs.short_desc, bugs.bug_status, p.login_name
+FROM
+  bugs
+  JOIN flags ON (bugs.bug_id = flags.bug_id AND flags.status = '?' AND flags.requestee_id IS NOT NULL)
+  JOIN bug_status bs ON (bs.value = bugs.bug_status AND bs.is_open != 0)
+  JOIN profiles p ON (p.userid = flags.requestee_id)
+WHERE
+  bugs.assigned_to != flags.requestee_id";
+    my $reqbugs = $dbh->selectall_arrayref($reqquery, undef);
+    push(@$openbugs, @$reqbugs);
+}
 
 # If there are no bugs (hah!), exit gracefully
 if (scalar(@$openbugs) == 0) {
@@ -87,7 +106,7 @@ foreach my $mail (keys %bugs) {
         $tblbugs,
         $bugcount
         );
-    # Send the mail via the bugzilla configuration now.
+    # Send the mail via the bugzilla configuration.
     MessageToMTA($mailmsg, 1);
     #print($mailmsg);
 }
