@@ -89,6 +89,11 @@ select {
     background: none;
 }
 
+.bz_comment_head, .bz_first_comment_head {
+    padding-top: .5em;
+    padding-bottom: .5em;
+}
+
 /**
  * The bugzilla authors use a table to align a button on several forms
  * within the preferences - we can't simply format tables our way...
