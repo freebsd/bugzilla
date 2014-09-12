@@ -157,6 +157,10 @@ sub _reassign_or_cc {
         if (REASSIGN != 0 && $user->login =~ /\@freebsd\.org$/i) {
             my $name = $user->login;
             $bug->set_assigned_to($user);
+            # since we set the maintainer-feedback? flag, the default
+            # behaviour of bugzilla is to add the user as CC.
+            # We do not need that on reassignments
+            $bug->remove_cc($user);
             $bug->add_comment("Auto-assigned to maintainer $name");
         } else {
             $bug->add_cc($user);
