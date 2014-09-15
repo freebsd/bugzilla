@@ -1,0 +1,29 @@
+ .dashboard {
+    background-color: #EEE;
+    border: 1px solid #DDD;
+    border-collapse: collapse;
+}
+
+.dashboard {
+    text-align: right;
+}
+
+.dashboard tr th {
+    padding: 1em;
+    border: 1px solid #DDD;
+}
+.dashboard tr td {
+    padding: 1em;
+    border: 1px solid #DDD;
+}
+.left {
+    text-align: left;
+}
+
+#dayselect {
+    width: 4em;
+}
+
+.product {
+    font-weight: bold;
+}

@@ -1,0 +1,8 @@
+[% IF error == "days_type_number" %]
+  [% title = "Invalid Days Type" %]
+  Invalid type for the days range.
+[% END %]
+[% IF error == "days_max_days" %]
+  [% title = "Invalid Days Range" %]
+  The maximum range for days is 365.
+[% END %]

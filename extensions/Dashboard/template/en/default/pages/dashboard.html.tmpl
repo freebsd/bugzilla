@@ -1,0 +1,113 @@
+[% PROCESS global/variables.none.tmpl %]
+[% PROCESS global/header.html.tmpl
+   title = "Dashboard"
+  style_urls = [ "extensions/Dashboard/web/style.css" ]
+  javascript_urls = [ ]
+%]
+
+[% optdays = [ 1, 2, 3, 4, 5, 6, 7, 14, 30, 60, 90, 120, 180, 240, 300, 365 ] %]
+
+<div id="bugzilla-body">
+  <div id="status">
+    <h2>Bug Summary</h2>
+    <p>The bug summary provides a brief overview about the most recently
+      opened and closed bugs for the project and a per-product basis.
+    </p>
+    <form action="page.cgi" method="get">
+      <input type="hidden" name="id" value="dashboard.html" />
+      <p>Day range:
+        <select id="dayselect" name="days">
+[% FOREACH day IN optdays %]
+[% IF day == days %]
+          <option selected="selected">[% day %]</option>
+[% ELSE %]
+          <option>[% day %]</option>
+[% END %]
+[% END %]
+        </select>
+        <input type="submit" value="Filter" />
+      </p>
+    </form>
+    <table class="dashboard">
+      <thead>
+        <tr>
+          <th class="left">Product</th>
+          <th>Total Open</th>
+          <th>New in the last [% days FILTER html %] days</th>
+          <th>Closed in the last [% days FILTER html %] days</th>
+          </tr>
+      </thead>
+      <tbody>
+[% FOREACH p IN products %]
+        <tr class="[% IF loop.count() % 2 == 0 %]bz_row_even[% ELSE %]bz_row_odd[% END %]">
+          <td class="product left">
+            <a href="buglist.cgi?product=[% p.name FILTER url %]">
+              [% p.name FILTER html %]</a>
+          </td>
+          <td>
+[% IF p.total != 0 %]
+            <a href="buglist.cgi?product=[% p.name FILTER url %]&amp;bug_status=__open__">[% p.total FILTER html %]</a>
+[% ELSE %]
+            0
+[% END %]
+          </td>
+          <td>
+[% IF p.new != 0 %]
+            <a href="[% p.nurl FILTER url %]">[% p.new FILTER html %]</a>
+[% ELSE %]
+            0
+[% END %]
+          </td>
+          <td>
+[% IF p.closed != 0 %]
+            <a href="[% p.curl FILTER url %]">[% p.closed FILTER html %]</a>
+[% ELSE %]
+            0
+[% END %]
+          </td>
+        </tr>
+[% END %]
+        <tr class="totals">
+          <td class="product left">Total numbers</td>
+          <td>
+            <a href="buglist.cgi?bug_status=__open__">[% totals.total %]</a>
+          </td>
+          <td>
+[% IF totals.open != 0 %]
+            <a href="[% totals.nurl FILTER url %]">[% totals.new %]</a>
+[% ELSE %]
+            0
+[% END %]
+          </td>
+          <td>
+[% IF totals.closed != 0 %]
+            <a href="[% totals.curl FILTER url %]">[% totals.closed %]</a>
+[% ELSE %]
+            0
+[% END %]
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+  <div id="queries">
+    <h2>Useful Queries</h2>
+    <p>Pre-defined queries to find bugs matching certain criteria.</p>
+    <table class="dashboard">
+      <thead>
+        <tr>
+          <th class="left">Query</th>
+          <th>Bug Count</th>
+      </thead>
+      <tbody>
+[% FOREACH q IN queries %]
+        <tr class="[% IF loop.count() % 2 == 0 %]bz_row_even[% ELSE %]bz_row_odd[% END %]">
+          <td class="left">[% q.desc %]</td>
+          <td><a href="[% q.url FILTER url %]">[% q.count %]</a></td>
+        </tr>
+[% END %]
+      </tbody>
+    </table>
+</div>
+[% PROCESS global/footer.html.tmpl %]
