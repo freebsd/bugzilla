@@ -2,7 +2,6 @@ package Bugzilla::Extension::Dashboard::Util;
 
 use strict;
 use POSIX qw(strftime);
-use Time::Local;
 use Bugzilla;
 use Bugzilla::Search;
 use base qw(Exporter);
@@ -29,7 +28,7 @@ sub _search {
     foreach my $bug (@$result) {
         push(@buglist, $bug->[0]);
     }
-    return (scalar(@buglist), \@buglist);
+    return ($criteria, scalar(@buglist), \@buglist);
 }
 
 sub open_bugs {

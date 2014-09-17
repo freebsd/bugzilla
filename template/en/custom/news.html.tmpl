@@ -1,0 +1,18 @@
+[%# News file for the FreeBSD bugzilla instance #%]
+[% news = [
+{
+  date => 'not released yet',
+  text => 'A new <a href="page.cgi?id=dashboard.html">Dashboard</a> page
+ has been added. It provides useful metrics and predefined searches for
+ various bug types. You can reach it from the link bars at the top or bottom.'
+},
+  ]
+%]
+
+[% FOREACH item IN news %]
+[% BREAK IF loop.count() > 5 %]
+<div class="entry">
+  <span class="date">[% item.date FILTER html %]</span>
+  <p>[% item.text %]</p>
+</div>
+[% END %]

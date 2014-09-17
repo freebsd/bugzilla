@@ -1,0 +1,64 @@
+/* Index page */
+#page-index {
+    max-width: 100%;
+    margin-left: 5em;
+    margin-right: 5em;
+    margin-bottom: 1em;
+}
+#left-index {
+    float: left;
+    width: 60%;
+}
+#right-index {
+    width: 35%;
+    float: right;
+}
+#welcome {
+    text-align: inherit;
+}
+.fbsd_quick_actions ul {
+    list-style-type: none;
+    padding-left: 3em;
+}
+.fbsd_quick_actions ul li {
+    margin-bottom: 1em;
+}
+
+.fbsd_quick_actions ul li a {
+    font-weight: bold;
+    text-decoration: none;
+}
+.fbsd_quick_actions ul li a:visited {
+    color: #900;
+}
+.fbsd_quick_actions ul li a:hover {
+    color: #000;
+}
+#query, #account, #enter_bug {
+    background: none;
+}
+
+/* Search form */
+div#quicksearch {
+    padding-left: 3em;
+}
+form#quicksearchForm {
+    display: inline-block;
+    text-align: inherit;
+    margin: 0;
+    padding: 0;
+}
+ul#quicksearch_links {
+    margin-top: 0.25em;
+    margin-bottom: 0;
+    text-align: center;
+}
+
+/* News feed */
+.news {
+    font-size: 85%;
+}
+
+.date {
+    font-weight: bold;
+}

@@ -30,10 +30,10 @@ a:hover {
     color: #000;
 }
 
+/* header and footer */
 #titles {
     background-color: #900;
 }
-
 .links li a {
     color: #666;
     text-decoration: none;
@@ -45,7 +45,6 @@ a:hover {
 #links-saved .links li a {
     font-weight: normal;
 }
-
 #header .links {
     background-color: #eee;
     border-left: 1px solid #ddd;
@@ -53,49 +52,24 @@ a:hover {
     border-bottom: 1px solid #ddd;
     border-radius: 5px;
 }
-
 #footer {
     background-color: #eee;
     border: 1px solid #ddd;
     border-radius: 5px;
 }
 
+/* Input elements */
 form input {
     border: 1px solid #DADADA;
 }
 form input[type="submit"] {
     background-color: #eee;
 }
-
 select {
     border: 1px solid #DADADA;
 }
 
-.fbsd_quick_actions {
-    margin-bottom: 2em;
-}
-.fbsd_quick_actions ul {
-    list-style-type: none;
-}
-.fbsd_quick_actions ul li {
-    margin-bottom: .5em;
-}
-
-.fbsd_quick_actions ul li a {
-    font-weight: bold;
-    text-decoration: none;
-}
-.fbsd_quick_actions ul li a:visited {
-    color: #900;
-}
-.fbsd_quick_actions ul li a:hover {
-    color: #000;
-}
-
-#query, #account, #enter_bug {
-    background: none;
-}
-
+/* Bug comments */
 .bz_comment_head, .bz_first_comment_head {
     padding-top: .5em;
     padding-bottom: .5em;

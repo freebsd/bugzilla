@@ -49,9 +49,9 @@ sub page_before_template {
     my $products = [];
     my $productlist = $user->get_selectable_products();
     foreach my $product (@$productlist) {
-        my ($ncount, $nbugs) = new_bugs($product, $days);
-        my ($ccount, $cbugs) = closed_bugs($product, $days);
-        my ($ocount, $obugs) = open_bugs($product),
+        my ($ncrit, $ncount, $nbugs) = new_bugs($product, $days);
+        my ($ccrit, $ccount, $cbugs) = closed_bugs($product, $days);
+        my ($ocrit, $ocount, $obugs) = open_bugs($product),
 
         $tncount += $ncount;
         $tccount += $ccount;
@@ -85,37 +85,49 @@ sub page_before_template {
 
 sub _predefined_queries {
     my ($user, $urlbase) = @_;
-    my ($count, $buglist);
-    my $queries = ();
+    my @result;
 
-    ($count, $buglist) = missing_feedback(DEFDAYS);
-    push(@$queries, {
-        "desc" => "Bugs waiting for feedback (flags) for more than " . DEFDAYS . " days",
-        "count" =>  $count,
-        "url" => "$urlbase/buglist.cgi?bug_id=" . join(",", @$buglist)
-         });
+    my @queries = (
+        {
+            "desc" => "Bugs waiting for feedback (flags) for more than " . DEFDAYS . " days",
+            "func" => \&missing_feedback,
+            "args" => DEFDAYS
+        },
+        {
+            "desc" => "Idle bugs, for which nothing happend for more than " . IDLEDAYS . " days",
+            "func" => \&idle_bugs,
+            "args" => IDLEDAYS
+        },
+        {
+            "desc" => "Ports bugs, that do not have been looked at yet",
+            "func" => \&new_ports_bugs,
+            "args" => undef
+        },
+        {
+            "desc" => "Ports bugs, that are ready to be taken by a committers",
+            "func" => \&commit_ports_bugs,
+            "args" => undef
+        }
+        );
+    foreach my $entry (@queries) {
+        my ($criteria, $count, $buglist) = $entry->{func}($entry->{args});
+        push(@result, {
+            "desc"  => $entry->{desc},
+            "count" => $count,
+            "url", "$urlbase/buglist.cgi?bug_id=" . join(",", @$buglist),
+            "query", _build_search($urlbase, $criteria)
+             });
+    }
+    return \@result;
+}
 
-    ($count, $buglist) = idle_bugs(IDLEDAYS);
-    push(@$queries, {
-        "desc" => "Idle bugs, for which nothing happend for more than " . IDLEDAYS . " days",
-        "count" =>  $count,
-        "url" => "$urlbase/buglist.cgi?bug_id=" . join(",", @$buglist)
-         });
-
-    ($count, $buglist) = new_ports_bugs();
-    push(@$queries, {
-        "desc" => "Ports bugs, that do not have been looked at yet",
-        "count" =>  $count,
-        "url" => "$urlbase/buglist.cgi?bug_id=" . join(",", @$buglist)
-         });
-
-    ($count, $buglist) = commit_ports_bugs();
-    push(@$queries, {
-        "desc" => "Ports bugs, that are ready to be taken by a committers",
-        "count" =>  $count,
-        "url" => "$urlbase/buglist.cgi?bug_id=" . join(",", @$buglist)
-         });
-    return $queries;
+sub _build_search {
+    my ($urlbase, $criteria) = @_;
+    my $url = "$urlbase/buglist.cgi?";
+    foreach my $key (keys %{$criteria}) {
+        $url .= "&$key=$criteria->{$key}";
+    }
+    return $url;
 }
 
 __PACKAGE__->NAME;

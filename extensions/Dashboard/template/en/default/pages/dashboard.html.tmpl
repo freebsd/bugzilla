@@ -103,11 +103,18 @@
       <tbody>
 [% FOREACH q IN queries %]
         <tr class="[% IF loop.count() % 2 == 0 %]bz_row_even[% ELSE %]bz_row_odd[% END %]">
-          <td class="left">[% q.desc %]</td>
+          <td class="left">[% q.desc %]
+            (<a href="[% q.query FILTER url %]">Query</a>)</td>
           <td><a href="[% q.url FILTER url %]">[% q.count %]</a></td>
         </tr>
 [% END %]
       </tbody>
     </table>
+
+    <p>
+      If you should have trouble with the searches or numbers provided, or if
+      you would like to see other predefined searches and metrics,
+      please <a href="enter_bug.cgi?product=Supporting%20Services&component=Bug%20Tracker">file a report</a>.
+    </p>
 </div>
 [% PROCESS global/footer.html.tmpl %]

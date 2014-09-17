@@ -101,70 +101,69 @@ YAHOO.util.Event.onDOMReady(onLoadActions);
 [% END %]
 
 <div id="page-index">
-  <table>
-    <tr>
-      <td>
-        <h1 id="welcome"> Welcome to [% terms.Bugzilla %]</h1>
-        <div class="intro">[% Hook.process('intro') %]</div>
+  <div id="left-index">
+    <h1 id="welcome"> Welcome to [% terms.Bugzilla %]</h1>
+    <div class="intro">[% Hook.process('intro') %]</div>
+    <div class="fbsd_quick_actions">
+      <p>
+        Use the quick links below, if you want to report a defect or
+        update.
+      </p>
+      <ul>
+        <li>
+          <a class="enter_bug" href="enter_bug.cgi?component=Individual%20Port%28s%29&product=Ports%20Tree"><span>Report an update or defect to a port</span></a>
+        </li>
+        <li>
+          <a class="enter_bug" href="enter_bug.cgi?product=Base%20System"><span>Report an issue with the base system</span></a>
+        </li>
+        <li>
+          <a class="enter_bug" href="enter_bug.cgi?product=Documentation"><span>Report an issue with the FreeBSD documentation or website</span></a>
+        </li>
+      </ul>
 
-        <div class="fbsd_quick_actions">
-          <p>
-            Use the quick links below, if you want to report a defect or
-            update.
-          </p>
-          <ul>
+      <p>If the above quick links do not suit your needs or if you have an issue in a different area:</p>
+      <ul>
+        <li>
+          <a class="enter_bug" href="enter_bug.cgi"><span>File [%= terms.aBug %]</span></a>
+        </li>
+      </ul>
+    </div>
+    <p>Or check, if your issue has been reported already:</p>
+    <div id="quicksearch">
+      <form id="quicksearchForm" name="quicksearchForm" action="buglist.cgi"
+            onsubmit="return checkQuicksearch(this);">
+        <div>
+          <input id="quicksearch_main" type="text" name="quicksearch"
+                 title="Quick Search"
+                 onfocus="quicksearchHelpText(this.id, 'hide');"
+                 onblur="quicksearchHelpText(this.id, 'show');"
+               >
+          <input id="find" type="submit" value="Quick Search">
+          <ul class="additional_links" id="quicksearch_links">
             <li>
-              <a class="enter_bug" href="enter_bug.cgi?component=Individual%20Port%28s%29&product=Ports%20Tree"><span>Report an update or defect to a port</span></a>
+              <a href="page.cgi?id=quicksearch.html">Quick Search help</a>
             </li>
-          </ul>
-
-          <ul>
-            <li>
-              <a class="enter_bug" href="enter_bug.cgi?product=Base%20System"><span>Report an issue with the base system</span></a>
-            </li>
-          </ul>
-
-          <ul>
-            <li>
-              <a class="enter_bug" href="enter_bug.cgi?product=Documentation"><span>Report an issue with the FreeBSD documentation or website</span></a>
-            </li>
-          </ul>
-
-          <p>If the above quick links do not suit your needs or if you have an issue in a different area:</p>
-          <ul>
-            <li>
-              <a class="enter_bug" href="enter_bug.cgi"><span>File [%= terms.aBug %]</span></a>
+            <li class="bz_default_hidden" id="quicksearch_plugin">
+              |
+              <a href="javascript:window.external.AddSearchProvider('[% urlbase FILTER html %]search_plugin.cgi')">
+                Install the Quick Search plugin
+              </a>
             </li>
           </ul>
         </div>
-        <p>Or check, if your issue has been reported already:</p>
-
-        <form id="quicksearchForm" name="quicksearchForm" action="buglist.cgi"
-              onsubmit="return checkQuicksearch(this);">
-          <div>
-            <input id="quicksearch_main" type="text" name="quicksearch"
-              title="Quick Search"
-              onfocus="quicksearchHelpText(this.id, 'hide');"
-              onblur="quicksearchHelpText(this.id, 'show');"
-            >
-            <input id="find" type="submit" value="Quick Search">
-            <ul class="additional_links" id="quicksearch_links">
-              <li>
-                <a href="page.cgi?id=quicksearch.html">Quick Search help</a>
-              </li>
-              <li class="bz_default_hidden" id="quicksearch_plugin">
-                |
-                <a href="javascript:window.external.AddSearchProvider('[% urlbase FILTER html %]search_plugin.cgi')">
-                 Install the Quick Search plugin
-                </a>
-              </li>
-            </ul>
-          </div>
-        </form>
-        <div class="outro">[% Hook.process('outro') %]</div>
-      </td>
-    </tr>
-  </table>
+      </form>
+    </div>
+    <div class="outro">[% Hook.process('outro') %]</div>
+  </div>
+[% IF user.login %]
+  <div id="right-index">
+    <h3>Latest [% terms.Bugzilla %] Changes</h3>
+    <div class="news">
+      [% INCLUDE news.html.tmpl %]
+    </div>
+  </div>
+[% END %]
+  <div style="clear: both;"></div>
 </div>
 
 [% PROCESS global/footer.html.tmpl %]
