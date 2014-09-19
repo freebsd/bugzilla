@@ -10,7 +10,9 @@ use Email::MIME;
 
 use constant {
     # Do we want to inform users about flags requested?
-    QUERY_FLAGS => 0
+    QUERY_FLAGS => 1,
+    # Consider bugs, for which nothing happened for more than X days
+    WAIT => 7
 };
 
 my $MAIL = "
@@ -33,8 +35,6 @@ Status          |    Bug Id | Description
 
 my $TBLROW = "%-15s | %9s | %-48.47s\n";
 
-my $WAIT = 7;
-
 # We're a non-interactive user
 Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 # Get the db conection and query the db directly.
@@ -50,7 +50,7 @@ FROM
   JOIN profiles p ON (p.userid = bugs.assigned_to AND p.is_enabled = 1)
 WHERE
   bugs.bug_status in (?, ?, ?)
-  AND } . $dnow . " - " . $dbh->sql_to_days("bugs.delta_ts") . " >= " . $WAIT .
+  AND } . $dnow . " - " . $dbh->sql_to_days("bugs.delta_ts") . " >= " . WAIT .
 " ORDER BY bugs.assigned_to, bugs.bug_status, bugs.bug_id;";
 
 my $openbugs = $dbh->selectall_arrayref(
