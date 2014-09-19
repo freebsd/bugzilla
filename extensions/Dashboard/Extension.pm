@@ -44,39 +44,39 @@ sub page_before_template {
 
     # Create some statistics about the total number of open bugs, new bugs
     # within the last XX days and closed bugs for the last XX days.
-    my (@tnbugs, @tcbugs);
-    my ($tncount, $tocount, $tccount) = (0, 0);
-    my $products = [];
+    my ($tncount, $tocount, $tccount) = (0, 0, 0);
+    my @products;
     my $productlist = $user->get_selectable_products();
     foreach my $product (@$productlist) {
         my ($ncrit, $ncount, $nbugs) = new_bugs($product, $days);
         my ($ccrit, $ccount, $cbugs) = closed_bugs($product, $days);
-        my ($ocrit, $ocount, $obugs) = open_bugs($product),
+        my ($ocrit, $ocount, $obugs) = open_bugs($product);
 
         $tncount += $ncount;
-        $tccount += $ccount;
         $tocount += $ocount;
+        $tccount += $ccount;
 
-        push(@tnbugs, @$nbugs);
-        push(@tcbugs, @$cbugs);
-
-        push(@$products, {
+        push(@products, {
             "name" => $product->name,
             "id" => $product->id,
             "total" => $ocount,
             "new" => $ncount,
-            "nurl" => "$urlbase/buglist.cgi?bug_id=" . join(",", @$nbugs),
+            "nurl" => _build_search($urlbase, $ncrit),
             "closed" => $ccount,
-            "curl" => "$urlbase/buglist.cgi?bug_id=" . join(",", @$cbugs)
+            "curl" => _build_search($urlbase, $ccrit)
              });
     }
-    $vars->{products} = $products;
+    $vars->{products} = \@products;
+
+    my $tncrit = new_bugs(undef, $days, 1);
+    my $tccrit = closed_bugs(undef, $days, 1);
+
     $vars->{totals} = {
         "total" => $tocount,
         "new" => $tncount,
-        "nurl" => "$urlbase/buglist.cgi?bug_id=" . join(",", @tnbugs),
+        "nurl" => _build_search($urlbase, $tncrit),
         "closed" => $tccount,
-        "curl" => "$urlbase/buglist.cgi?bug_id=" . join(",", @tcbugs)
+        "curl" => _build_search($urlbase, $tccrit),
     };
     $vars->{days} = $days;
     # Get useful queries
@@ -99,23 +99,27 @@ sub _predefined_queries {
             "args" => IDLEDAYS
         },
         {
+            "desc" => "Bugs, that need to be backported from current/head (MFC)",
+            "func" => \&mfc_bugs,
+            "args" => undef
+        },
+        {
             "desc" => "Ports bugs, that do not have been looked at yet",
             "func" => \&new_ports_bugs,
             "args" => undef
         },
         {
-            "desc" => "Ports bugs, that are ready to be taken by a committers",
+            "desc" => "Ports bugs, that are ready to be taken by a committer",
             "func" => \&commit_ports_bugs,
             "args" => undef
-        }
+        },
         );
     foreach my $entry (@queries) {
         my ($criteria, $count, $buglist) = $entry->{func}($entry->{args});
         push(@result, {
             "desc"  => $entry->{desc},
             "count" => $count,
-            "url", "$urlbase/buglist.cgi?bug_id=" . join(",", @$buglist),
-            "query", _build_search($urlbase, $criteria)
+            "url" => _build_search($urlbase, $criteria)
              });
     }
     return \@result;

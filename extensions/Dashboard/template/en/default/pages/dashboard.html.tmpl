@@ -103,8 +103,7 @@
       <tbody>
 [% FOREACH q IN queries %]
         <tr class="[% IF loop.count() % 2 == 0 %]bz_row_even[% ELSE %]bz_row_odd[% END %]">
-          <td class="left">[% q.desc %]
-            (<a href="[% q.query FILTER url %]">Query</a>)</td>
+          <td class="left">[% q.desc %]</td>
           <td><a href="[% q.url FILTER url %]">[% q.count %]</a></td>
         </tr>
 [% END %]

@@ -204,7 +204,7 @@ sub _update_status {
 
 sub _get_maintainer {
     # we expect _get_maintainer("category/port")
-    my $port = shift;
+    my $port = shift();
     my $portdir = "" . PORTSDIR . "/$port";
     # Does it exist and is a directory?
     if (-d $portdir) {

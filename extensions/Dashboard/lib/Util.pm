@@ -12,38 +12,40 @@ use constant {
 
 our @EXPORT = qw(
     open_bugs new_bugs closed_bugs missing_feedback idle_bugs
-    new_ports_bugs commit_ports_bugs
+    new_ports_bugs commit_ports_bugs mfc_bugs
 );
 
 sub _search {
-    my $criteria = shift;
+    my $criteria = shift();
     my $search = new Bugzilla::Search(
         "fields"          => [ "bug_id" ],
         "params"          => $criteria,
         "user"            => Bugzilla->user,
-        "allow_unlimited" => 1);
-
+        "allow_unlimited" => 1
+        );
     my $result = $search->data;
-    my @buglist = ();
-    foreach my $bug (@$result) {
-        push(@buglist, $bug->[0]);
-    }
-    return ($criteria, scalar(@buglist), \@buglist);
+    return ($criteria, scalar(@$result), \$result);
 }
 
 sub open_bugs {
-    my $product = shift;
+    my $product = shift();
+    my $critonly = shift();
+
     my %criteria = (
         "bug_status" => "__open__",
     );
     if (defined($product)) {
         $criteria{"product"} = $product->name;
     }
-    return _search(\%criteria);
+    if ($critonly) {
+        return \%criteria;
+    } else {
+        return _search(\%criteria);
+    }
 }
 
 sub new_bugs {
-    my ($product, $days) = @_;
+    my ($product, $days, $critonly) = @_;
 
     my $back = time() - ($days * SEC_PER_DAY);
     my $ts = strftime("%Y-%m-%d", localtime($back));
@@ -57,11 +59,15 @@ sub new_bugs {
     if (defined($product)) {
         $criteria{"product"} = $product->name;
     }
-    return _search(\%criteria);
+    if ($critonly) {
+        return \%criteria;
+    } else {
+        return _search(\%criteria);
+    }
 }
 
 sub closed_bugs {
-    my ($product, $days) = @_;
+    my ($product, $days, $critonly) = @_;
 
     my $back = time() - ($days * 24 * 60 * 60);
     my $ts = strftime("%Y-%m-%d", localtime($back));
@@ -75,11 +81,15 @@ sub closed_bugs {
     if (defined($product)) {
         $criteria{"product"} = $product->name;
     }
-    return _search(\%criteria);
+    if ($critonly) {
+        return \%criteria;
+    } else {
+        return _search(\%criteria);
+    }
 }
 
 sub missing_feedback {
-    my ($days) = @_;
+    my ($days, $critonly) = @_;
 
     my %criteria = (
         "bug_status" => "__open__",
@@ -90,11 +100,15 @@ sub missing_feedback {
         "o2" => "greaterthan",
         "v2" => "" . $days
         );
-    return _search(\%criteria);
+    if ($critonly) {
+        return \%criteria;
+    } else {
+        return _search(\%criteria);
+    }
 }
 
 sub idle_bugs {
-    my ($days) = @_;
+    my ($days, $critonly) = @_;
 
     my %criteria = (
         "bug_status" => "__open__",
@@ -102,12 +116,18 @@ sub idle_bugs {
         "o2" => "greaterthan",
         "v2" => "" . $days
         );
-    return _search(\%criteria);
+    if ($critonly) {
+        return \%criteria;
+    } else {
+        return _search(\%criteria);
+    }
 }
 
 sub new_ports_bugs {
+    my $critonly = shift();
+
     my %criteria = (
-        "bug_status" => "New",
+        "bug_status" => "Needs Triage",
         "email1" => "freebsd-ports-bugs\@FreeBSD.org",
         "emailassigned_to1" => "1",
         "emailtype1" => "exact",
@@ -116,10 +136,16 @@ sub new_ports_bugs {
         "o1" => "equals",
         "v1" => "1"
         );
-     return _search(\%criteria);
+    if ($critonly) {
+        return \%criteria;
+    } else {
+        return _search(\%criteria);
+    }
 }
 
 sub commit_ports_bugs {
+    my $critonly = shift();
+
     my %criteria = (
         "bug_status" => "Patch Ready",
         "email1" => "freebsd-ports-bugs\@FreeBSD.org",
@@ -127,5 +153,22 @@ sub commit_ports_bugs {
         "emailtype1" => "exact",
         "product" => "Ports Tree",
         );
-     return _search(\%criteria);
+    if ($critonly) {
+        return \%criteria;
+    } else {
+        return _search(\%criteria);
+    }
+}
+
+sub mfc_bugs {
+    my $critonly = shift();
+
+    my %criteria = (
+        "bug_status" => "Needs MFC",
+        );
+    if ($critonly) {
+        return \%criteria;
+    } else {
+        return _search(\%criteria);
+    }
 }
