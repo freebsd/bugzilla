@@ -35,18 +35,21 @@ sub _link_ports {
     my $rev = $1 || "";
     my $link = "<a href=\"" . SVN_PORTS .
         "$rev\" title=\"revision $rev in ports\">ports r$rev</a>";
+    return $link;
 }
 
 sub _link_base {
     my $rev = $1 || "";
     my $link = "<a href=\"" . SVN_BASE .
         "$rev\" title=\"revision $rev in base\">base r$rev</a>";
+    return $link;
 }
 
 sub _link_doc {
     my $rev = $1 || "";
     my $link = "<a href=\"" . SVN_DOC .
         "$rev\" title=\"revision $rev in doc\">doc r$rev</a>";
+    return $link;
 }
 
 __PACKAGE__->NAME;
