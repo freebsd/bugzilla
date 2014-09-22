@@ -2,9 +2,25 @@
 [% news = [
 {
   date => 'not released yet',
-  text => 'A new <a href="page.cgi?id=dashboard.html">Dashboard</a> page
- has been added. It provides useful metrics and predefined searches for
- various bug types. You can reach it from the link bars at the top or bottom.'
+  text => '<ul>
+  <li>A new <a href="page.cgi?id=dashboard.html">Dashboard</a>
+    page has been added. It provides useful metrics and predefined searches
+    for various bug types. You can reach it from the link bars at the top or
+    bottom.
+  </li>
+  <li>Links to commits of the different SVN repositories can be embedded in
+    comments now. They work similar to bug or comment links using a
+    <strong>repotype XXXX</strong> syntax. Valid repotype values are
+    <ul><li><strong>ports</strong> for ports commits</li>
+      <li><strong>base</strong> for base system commits and</li>
+      <li><strong>doc</strong> for documentation commits</li>
+      <li><strong>review</strong> for links
+      to <a href="https://reviews.FreeBSD.org">reviews.FreeBSD.org</a> - those
+      must have a leading <strong>D</strong>, e.g. <strong>review
+      D123</strong>.</li>
+    </ul>
+  </li>
+</ul>'
 },
   ]
 %]

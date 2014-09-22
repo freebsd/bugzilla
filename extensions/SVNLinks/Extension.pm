@@ -9,6 +9,7 @@ use constant {
     SVN_PORTS => "http://svnweb.freebsd.org/changeset/ports/",
     SVN_BASE => "http://svnweb.freebsd.org/changeset/base/",
     SVN_DOC => "http://svnweb.freebsd.org/changeset/doc/",
+    PHABRIC => "https://reviews.freebsd.org/",
 };
 
 our $VERSION = '0.1.0';
@@ -28,6 +29,10 @@ sub bug_format_comment {
     push(@$regexes, {
         match => qr/doc\s*\#?\s*r?(\d+)/i,
         replace => \&_link_doc
+         });
+    push(@$regexes, {
+        match => qr/review\s*\#?\s*(D\d+)/i,
+        replace => \&_link_phabric
          });
 }
 
@@ -49,6 +54,13 @@ sub _link_doc {
     my $rev = $1 || "";
     my $link = "<a href=\"" . SVN_DOC .
         "$rev\" title=\"revision $rev in doc\">doc r$rev</a>";
+    return $link;
+}
+
+sub _link_phabric {
+    my $rev = $1 || "";
+    my $link = "<a href=\"" . PHABRIC .
+        "$rev\" title=\"Review $rev on reviews.FreeBSD.org\">review $rev</a>";
     return $link;
 }
 
