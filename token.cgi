@@ -171,6 +171,7 @@ sub cancelChangePassword {
 # password and that the new password is valid.
 sub changePassword {
     my ($user_id, $token) = @_;
+    my $dbh = Bugzilla->dbh;
 
     my $password = $cgi->param('password');
     (defined $password && defined $cgi->param('matchpassword'))
@@ -184,6 +185,8 @@ sub changePassword {
     $user->set_password($password);
     $user->update();
     delete_token($token);
+    $dbh->do(q{DELETE FROM tokens WHERE userid = ?
+               AND tokentype = 'password'}, undef, $user_id);
 
     Bugzilla->logout_user_by_id($user_id);
 
@@ -262,7 +265,7 @@ sub cancelChangeEmail {
         # check to see if it has been altered
         if ($user->login ne $old_email) {
             $user->set_login($old_email);
-            $user->update({ keep_session => 1 });
+            $user->update({ keep_tokens => 1 });
 
             $vars->{'message'} = "email_change_canceled_reinstated";
         } 
@@ -314,7 +317,7 @@ sub confirm_create_account {
 
     my $otheruser = Bugzilla::User->create({
         login_name => $login_name, 
-        realname   => $cgi->param('realname'), 
+        realname   => scalar $cgi->param('realname'),
         cryptpassword => $password});
 
     # Now delete this token.
