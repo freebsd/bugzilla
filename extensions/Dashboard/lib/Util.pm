@@ -96,9 +96,9 @@ sub missing_feedback {
         "f1" => "flagtypes.name",
         "o1" => "substring",
         "v1" => "?",
-        "f2" => "days_elapsed",
-        "o2" => "greaterthan",
-        "v2" => "" . $days
+        "f2" => "flagtypes.name",
+        "o2" => "changedbefore",
+        "v2" => "" . $days . "d"
         );
     if ($critonly) {
         return \%criteria;
