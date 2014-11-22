@@ -1,6 +1,8 @@
 body {
     font-family: Verdana, sans-serif;
     background-image: none;
+    background-color: #fff;
+    color: #000;
 }
 
 h1, h2, h3, h4, h5 {

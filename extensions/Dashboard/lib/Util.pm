@@ -127,7 +127,7 @@ sub new_ports_bugs {
     my $critonly = shift();
 
     my %criteria = (
-        "bug_status" => "Needs Triage",
+        "bug_status" => "New",
         "email1" => "freebsd-ports-bugs\@FreeBSD.org",
         "emailassigned_to1" => "1",
         "emailtype1" => "exact",
@@ -147,10 +147,12 @@ sub commit_ports_bugs {
     my $critonly = shift();
 
     my %criteria = (
-        "bug_status" => "Patch Ready",
         "email1" => "freebsd-ports-bugs\@FreeBSD.org",
         "emailassigned_to1" => "1",
         "emailtype1" => "exact",
+        "f1" => "keywords",
+        "o1" => "substring",
+        "v1" => "patch-ready",
         "product" => "Ports Tree",
         );
     if ($critonly) {
@@ -164,7 +166,9 @@ sub mfc_bugs {
     my $critonly = shift();
 
     my %criteria = (
-        "bug_status" => "Needs MFC",
+        "f1" => "flagtypes.name",
+        "o1" => "anywordssubstr",
+        "v1" => "mfc-stable8? mfc-stable9? mfc-stable10? merge-quarterly?",
         );
     if ($critonly) {
         return \%criteria;

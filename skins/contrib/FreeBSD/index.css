@@ -42,6 +42,7 @@
 div#quicksearch {
     padding-left: 3em;
 }
+
 form#quicksearchForm {
     display: inline-block;
     text-align: inherit;

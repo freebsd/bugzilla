@@ -1,6 +1,31 @@
 [%# News file for the FreeBSD bugzilla instance #%]
 [% news = [
 {
+  date => '2014-11-22',
+  text => '<p>The status switches were reworked to simplify
+    workflows:</p>
+<ul>
+  <li><strong>Needs Triage</strong> has become <strong>New</strong></li>
+  <li><strong>Aproval Needed</strong> and <strong>Feedback
+    Needed</strong> have been removed. Use
+    the <strong>maintainer-feedback</strong> flag instead.</li>
+  <li><strong>In Discussion</strong> has been renamed to <strong>In
+  Progress</strong>.</li>
+  <li><strong>Needs MFC</strong> has ben removed. Use the
+    <strong>mfc-stableX</strong> and <strong>merge-quarterly</strong>
+    flags instead.</li>
+  <li><strong>Patch Ready</strong> has been removed. Use
+  the <strong>patch-ready</strong> keyword instead.</li>
+  <li><strong>Issue Resolved</strong> and <strong>Timeout</strong> have
+    become <strong>Closed</strong>.</li>
+</ul>
+<p>Please check your saved queries and report charts. Other changes:</p>
+<ul>
+  <li>Some minor styling issues with the CSS have been fixed.</li>
+</ul>
+  '
+},
+{
   date => '2014-11-01',
   text => '<ul>
   <li>A minor formatting issue with the SVN and review links was fixed, so that
