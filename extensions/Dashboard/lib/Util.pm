@@ -154,6 +154,7 @@ sub commit_ports_bugs {
         "o1" => "substring",
         "v1" => "patch-ready",
         "product" => "Ports Tree",
+        "bug_status" => "__open__",
         );
     if ($critonly) {
         return \%criteria;
@@ -169,6 +170,7 @@ sub mfc_bugs {
         "f1" => "flagtypes.name",
         "o1" => "anywordssubstr",
         "v1" => "mfc-stable8? mfc-stable9? mfc-stable10? merge-quarterly?",
+        "bug_status" => "__open__",
         );
     if ($critonly) {
         return \%criteria;
