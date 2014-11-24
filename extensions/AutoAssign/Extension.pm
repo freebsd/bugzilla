@@ -16,12 +16,10 @@ use constant {
     INDEX => "INDEX",
     # Needs to be changed to an internal user
     UID_AUTOASSIGN => "bugzilla\@FreeBSD.org",
-    # We want a comment about the automatic action
-    AUTOCOMMENT => 1,
     REASSIGN => 1
 };
 
-our $VERSION = '0.1.0';
+our $VERSION = '0.2.0';
 
 sub install_update_db {
     my ($self, $args) = @_;
@@ -69,55 +67,81 @@ sub bug_end_of_create {
     my @foundports = ();
 
     # Is it a port patch in summary matching ([A-Za-z0-9_-]/[A-Za-z0-9_-])?
-    my @res = ($bug->short_desc =~ /([\w-]+\/[\w-]+)/g);
+    my @res = ($bug->short_desc =~ /(?:^|[:\s+])([\w-]+\/[\w-]+)(?:[:\s+]|$)/g);
     if (@res && scalar(@res) > 0) {
         # warn("Found ports in summary: @res");
         push(@foundports, @res);
     }
-    # Remove duplicate entries.
-    my %hashed = map{$_, 1} @foundports;
-    @foundports = keys(%hashed);
 
     if (scalar(@foundports) == 0) {
         # Did not find a port in subject
         # Is it a port in the description matching
         #  ([A-Za-z0-9_-]/[A-Za-z0-9_-])?
         my $first = $bug->comments->[0]->body;
-        @res = ($first =~ /([\w-]+\/[\w-]+)/g);
+        @res = ($first =~ /(?:^|[:,\s+])([\w-]+\/[\w-]+)(?:[:,\s+]|$)/g);
         if (@res && scalar(@res) > 0) {
             # warn("Found ports in description: @res");
             push(@foundports, @res);
         }
     }
     # Remove duplicate entries.
-    %hashed = map{$_, 1} @foundports;
+    my %hashed = map{$_, 1} @foundports;
     @foundports = keys(%hashed);
 
-    my $flag_feedback;
-    my $flagtypes = Bugzilla::FlagType::match(
-        { name => 'maintainer-feedback' });
-    if (scalar(@$flagtypes) == 1) {
-        $flag_feedback = @{$flagtypes}[0];
+    # Add the maintainers of the affected ports to the CC. If there is
+    # only one person, add a feedback request for that person and
+    # optionally assign (if it is a committer), otherwise set all into
+    # CC.
+
+    my @maintainers = ();
+    my @categories = ();
+    foreach my $port (@foundports) {
+        my $maintainer = _get_maintainer($port);
+        if ($maintainer) {
+            push(@maintainers, $maintainer);
+            push(@categories, $port =~ /^([\w-]+)\/[\w-]+$/g);
+        }
     }
 
-    # Add the maintainers of the affected ports to the CC. If there is only
-    # one person, add a feedback request for that person and optionally assign
-    # (if it is a committer), otherwise set all into CC.
-    if (scalar(@foundports) == 1) {
-        my ($maintainer, $user) = _get_maintainer($foundports[0]);
+    # Remove duplicate entries
+    %hashed = map{$_, 1} @maintainers;
+    @maintainers = keys(%hashed);
+    %hashed = map{$_, 1} @categories;
+    @categories = keys(%hashed);
+
+    _update_bug($bug, \@maintainers, \@categories);
+}
+
+sub _update_bug {
+    my ($bug, $maintainers, $categories) = @_;
+
+    # Switch the user session
+    my $autoid = login_to_id(UID_AUTOASSIGN);
+    if (!$autoid) {
+        warn("AutoAssign user does not exist");
+        return;
+    }
+    my $curuser = Bugzilla->user;
+    Bugzilla->set_user(new Bugzilla::User($autoid));
+
+    # Only one maintainer?
+    if (scalar(@$maintainers) == 1) {
+        my $maintainer = @$maintainers[0];
+        my $user = _get_user($maintainer);
         if (!$user) {
-            # warn("Could not find maintainer for $foundports[0]");
             return;
         }
-        if (!$user->is_enabled) {
-            warn("Found maintainer is not enabled in Bugzilla");
-            return;
-        }
-        if (Bugzilla->user->id == $user->id) {
+        if ($curuser->id == $user->id) {
             # Maintainer updates should not ask the user for feedback.
             return;
         }
 
+        my $flag_feedback;
+        my $flagtypes = Bugzilla::FlagType::match(
+            { name => 'maintainer-feedback' });
+        if (scalar(@$flagtypes) == 1) {
+            $flag_feedback = @{$flagtypes}[0];
+        }
         if (!$flag_feedback) {
             warn("maintainer-feedback flag not found");
         } else {
@@ -128,32 +152,6 @@ sub bug_end_of_create {
                  });
             $bug->set_flags(\@oldflags, \@newflags);
         }
-        _reassign_or_cc($bug, $user);
-    } else {
-        my $someoneccd = 0;
-        foreach my $port (@foundports) {
-            my $user = _get_maintainer($port);
-            if ($user) {
-                $bug->add_cc($user);
-                $someoneccd = 1;
-            } else {
-                # warn("Could not find maintainer for '$port'");
-            }
-        }
-        if ($someoneccd == 1) {
-            _add_comment($bug, "Maintainers CC'd");
-        }
-    }
-}
-
-sub _reassign_or_cc {
-    my ($bug, $user) = @_;
-
-    my $autoid = login_to_id(UID_AUTOASSIGN);
-    # Do not do anything, if the user does not exist.
-    if ($autoid) {
-        my $curuser = Bugzilla->user;
-        Bugzilla->set_user(new Bugzilla::User($autoid));
         if (REASSIGN != 0 && $user->login =~ /\@freebsd\.org$/i) {
             my $name = $user->login;
             $bug->set_assigned_to($user);
@@ -166,40 +164,54 @@ sub _reassign_or_cc {
             $bug->add_cc($user);
             $bug->add_comment("Maintainer CC'd");
         }
-        Bugzilla->set_user($curuser);
     } else {
-        warn("configured auto-assign user missing!")
+        my $someoneccd = 0;
+        foreach my $maintainer (@$maintainers) {
+            my $user = _get_user($maintainer);
+            if ($user && $curuser->id != $user->id) {
+                $bug->add_cc($user);
+                $someoneccd = 1;
+            }
+        }
+        if ($someoneccd == 1) {
+            $bug->add_comment("Maintainers CC'd");
+        }
     }
+
+    # Deal with special requirements: bug 195253
+    #  1) port is positively identified
+    #  2) port is in games category
+    #  3) port is unmaintained
+    #  ==> add games@FreeBSD.org as CC
+    if (grep { lc($_) eq "games" } @$categories) {
+        if (grep { lc($_) eq "ports\@freebsd.org" } @$maintainers) {
+            my $user = _get_user("games\@FreeBSD.org");
+            if ($user) {
+                $bug->add_cc($user);
+            }
+        }
+    }
+
+    # Switch the user session back.
+    Bugzilla->set_user($curuser);
 }
 
-sub _add_comment {
-    my ($bug, $comment) = @_;
-    if (AUTOCOMMENT == 0) {
+sub _get_user {
+    my $maintainer = shift();
+    if (lc($maintainer) eq "ports\@freebsd.org") {
         return;
     }
-    my $autoid = login_to_id(UID_AUTOASSIGN);
-    # Do not set a comment, if the user does not exist.
-    if ($autoid) {
-        my $curuser = Bugzilla->user;
-        Bugzilla->set_user(new Bugzilla::User($autoid));
-        $bug->add_comment($comment);
-        Bugzilla->set_user($curuser);
-    } else {
-        warn("configured auto-assign user missing!")
+    my $uid = login_to_id($maintainer);
+    if (!$uid) {
+        warn("No user found for $maintainer");
+        return;
     }
-}
-
-sub _update_status {
-    my ($bug, $status) = @_;
-    my $autoid = login_to_id(UID_AUTOASSIGN);
-    if ($autoid) {
-        my $curuser = Bugzilla->user;
-        Bugzilla->set_user(new Bugzilla::User($autoid));
-        $bug->set_bug_status($status);
-        Bugzilla->set_user($curuser);
-    } else {
-        warn("configured auto-assign user missing!")
+    my $user = new Bugzilla::User($uid);
+    if (!$user->is_enabled) {
+        warn("Found maintainer $maintainer is not enabled in Bugzilla");
+        return;
     }
+    return $user;
 }
 
 sub _get_maintainer {
@@ -215,17 +227,7 @@ sub _get_maintainer {
         my $maintainer = `PORTSDIR=@{[PORTSDIR]} make -C $portdir -V MAINTAINER`;
         $ENV{PATH} = $oldenv;
         chomp($maintainer);
-        if ($maintainer) {
-            # Do not bother ports@FreeBSD.org
-            if (lc($maintainer) eq "ports\@freebsd.org") {
-                # warn("$port ignored, maintainer is ports\@FreeBSD.org");
-                return;
-            }
-            my $uid = login_to_id($maintainer);
-            if ($uid) {
-                return ($maintainer, new Bugzilla::User($uid));
-            }
-        }
+        return $maintainer;
     } else {
         warn("Port directory $portdir not found");
     }
