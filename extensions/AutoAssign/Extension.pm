@@ -129,10 +129,12 @@ sub _update_bug {
         my $maintainer = @$maintainers[0];
         my $user = _get_user($maintainer);
         if (!$user) {
+            Bugzilla->set_user($curuser);
             return;
         }
         if ($curuser->id == $user->id) {
             # Maintainer updates should not ask the user for feedback.
+            Bugzilla->set_user($curuser);
             return;
         }
 
