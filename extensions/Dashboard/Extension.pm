@@ -8,7 +8,7 @@ use Bugzilla::Error;
 use Bugzilla::Util;
 use Bugzilla::Extension::Dashboard::Util;
 
-our $VERSION = '0.01';
+our $VERSION = '0.1.0';
 
 use constant {
     MAXDAYS => 366,
