@@ -71,10 +71,29 @@ select {
     border: 1px solid #DADADA;
 }
 
+.bz_comment {
+    border: 1px solid #ddd;
+    border-radius: 0.25em;
+    border-collapse: collapse;
+}
+
 /* Bug comments */
 .bz_comment_head, .bz_first_comment_head {
     padding-top: .5em;
     padding-bottom: .5em;
+}
+.bz_comment_text {
+    padding-left: .5em;
+    padding-right: .5em;
+}
+
+/* Attachments */
+
+#attachment_table {
+    width: 100%;
+}
+#attachment_table th, .bz_attach_footer {
+    background-color: #eee;
 }
 
 /**
