@@ -1,12 +1,11 @@
-What is freebsd/bugzilla?
-=========================
+# What is freebsd/bugzilla?
 
 freebsd/bugzilla is a set of changes and extensions for Bugzilla being used
 by the FreeBSD project. Those usually map a Bugzilla source package layout
 in a 1:1 fashion.
 
-How do I use it?
-================
+# How do I use it?
+
 freebsd/bugzilla will refer to a certain bugzilla package from the FreeBSD
 ports, usually the latest stable one (devel/bugzilla44 as of now).
 

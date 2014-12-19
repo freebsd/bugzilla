@@ -17,7 +17,7 @@ sub bug_check_can_change_field {
     my ($self, $args) = @_;
     if ($args->{'field'} eq 'keywords') {
         my $user = Bugzilla->user;
-        if (!$user->in_group('freebsd_committer', $args->{'bug'}->product_id)) {
+        if (!$user->in_group('editbugs', $args->{'bug'}->product_id)) {
             push($args->{'priv_results'}, PRIVILEGES_REQUIRED_EMPOWERED);
             return;
         }
