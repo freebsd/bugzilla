@@ -19,19 +19,19 @@ sub bug_format_comment {
     my $regexes = $args->{regexes};
 
     push(@$regexes, {
-        match => qr/ports\h*\#?\h*r?(\d+)/i,
+        match => qr/(?:^|\h+)ports\h+(?:\#|r)?(\d+)/i,
         replace => \&_link_ports
          });
     push(@$regexes, {
-        match => qr/base\h*\#?\h*r?(\d+)/i,
+        match => qr/(?:^|\h+)base\h+(?:\#|r)?(\d+)/i,
         replace => \&_link_base
          });
     push(@$regexes, {
-        match => qr/doc\h*\#?\h*r?(\d+)/i,
+        match => qr/(?:^|\h+)doc\h+(?:\#|r)?(\d+)/i,
         replace => \&_link_doc
          });
     push(@$regexes, {
-        match => qr/review\h*\#?\h*(D\d+)/i,
+        match => qr/(?:^|\h+)review\h+(D\d+)/i,
         replace => \&_link_phabric
          });
 }
