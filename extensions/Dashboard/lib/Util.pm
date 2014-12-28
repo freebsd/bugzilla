@@ -131,7 +131,7 @@ sub new_ports_bugs {
         "email1" => "freebsd-ports-bugs\@FreeBSD.org",
         "emailassigned_to1" => "1",
         "emailtype1" => "exact",
-        "product" => "Ports Tree",
+        "product" => "Ports & Packages",
         "f1" => "longdescs.count",
         "o1" => "equals",
         "v1" => "1"
@@ -153,7 +153,7 @@ sub commit_ports_bugs {
         "f1" => "keywords",
         "o1" => "substring",
         "v1" => "patch-ready",
-        "product" => "Ports Tree",
+        "product" => "Ports & Packages",
         "bug_status" => "__open__",
         );
     if ($critonly) {

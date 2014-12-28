@@ -41,26 +41,34 @@
 [% FOREACH p IN products %]
         <tr class="[% IF loop.count() % 2 == 0 %]bz_row_even[% ELSE %]bz_row_odd[% END %]">
           <td class="product left">
-            <a href="buglist.cgi?product=[% p.name FILTER url %]">
+            <a href="buglist.cgi?product=[% p.name FILTER uri %]">
               [% p.name FILTER html %]</a>
           </td>
           <td>
 [% IF p.total != 0 %]
-            <a href="buglist.cgi?product=[% p.name FILTER url %]&amp;bug_status=__open__">[% p.total FILTER html %]</a>
+            <a href="buglist.cgi?product=[% p.name FILTER uri %]&amp;bug_status=__open__">[% p.total FILTER html %]</a>
 [% ELSE %]
             0
 [% END %]
           </td>
           <td>
 [% IF p.new != 0 %]
-            <a href="[% p.nurl FILTER url %]">[% p.new FILTER html %]</a>
+            <a href="buglist.cgi?
+[% FOREACH i IN p.ncrit %]
+&[% i.key %]=[% i.value FILTER uri %]
+[% END %]
+">[% p.new FILTER html %]</a>
 [% ELSE %]
             0
 [% END %]
           </td>
           <td>
 [% IF p.closed != 0 %]
-            <a href="[% p.curl FILTER url %]">[% p.closed FILTER html %]</a>
+            <a href="buglist.cgi?
+[% FOREACH i IN p.ccrit %]
+&[% i.key %]=[% i.value FILTER uri %]
+[% END %]
+">[% p.closed FILTER html %]</a>
 [% ELSE %]
             0
 [% END %]
@@ -74,14 +82,23 @@
           </td>
           <td>
 [% IF totals.open != 0 %]
-            <a href="[% totals.nurl FILTER url %]">[% totals.new %]</a>
+            <a href="buglist.cgi?
+[% FOREACH i IN totals.ncrit %]
+&[% i.key %]=[% i.value FILTER uri %]
+[% END %]
+">[% totals.new FILTER html %]</a>
 [% ELSE %]
             0
 [% END %]
           </td>
           <td>
 [% IF totals.closed != 0 %]
-            <a href="[% totals.curl FILTER url %]">[% totals.closed %]</a>
+            <a href="buglist.cgi?
+[% FOREACH i IN totals.ccrit %]
+&[% i.key %]=[% i.value FILTER uri %]
+[% END %]
+">[% totals.closed FILTER html %]</a>
+
 [% ELSE %]
             0
 [% END %]
@@ -104,7 +121,11 @@
 [% FOREACH q IN queries %]
         <tr class="[% IF loop.count() % 2 == 0 %]bz_row_even[% ELSE %]bz_row_odd[% END %]">
           <td class="left">[% q.desc %]</td>
-          <td><a href="[% q.url FILTER url %]">[% q.count %]</a></td>
+          <td><a href="buglist.cgi?
+[% FOREACH i IN q.crit %]
+&[% i.key %]=[% i.value FILTER uri %]
+[% END %]
+">[% q.count %]</a></td>
         </tr>
 [% END %]
       </tbody>

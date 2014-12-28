@@ -61,9 +61,9 @@ sub page_before_template {
             "id" => $product->id,
             "total" => $ocount,
             "new" => $ncount,
-            "nurl" => _build_search($urlbase, $ncrit),
+            "ncrit" => $ncrit,
             "closed" => $ccount,
-            "curl" => _build_search($urlbase, $ccrit)
+            "ccrit" => $ccrit
              });
     }
     $vars->{products} = \@products;
@@ -74,9 +74,9 @@ sub page_before_template {
     $vars->{totals} = {
         "total" => $tocount,
         "new" => $tncount,
-        "nurl" => _build_search($urlbase, $tncrit),
+        "ncrit" => $tncrit,
         "closed" => $tccount,
-        "curl" => _build_search($urlbase, $tccrit),
+        "ccrit" => $tccrit,
     };
     $vars->{days} = $days;
     # Get useful queries
@@ -119,19 +119,10 @@ sub _predefined_queries {
         push(@result, {
             "desc"  => $entry->{desc},
             "count" => $count,
-            "url" => _build_search($urlbase, $criteria)
+            "crit" => $criteria
              });
     }
     return \@result;
-}
-
-sub _build_search {
-    my ($urlbase, $criteria) = @_;
-    my $url = "$urlbase/buglist.cgi?";
-    foreach my $key (keys %{$criteria}) {
-        $url .= "&$key=$criteria->{$key}";
-    }
-    return $url;
 }
 
 __PACKAGE__->NAME;
