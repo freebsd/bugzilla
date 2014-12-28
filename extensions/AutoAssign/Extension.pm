@@ -60,7 +60,7 @@ sub bug_end_of_create {
     my $bug = $args->{'bug'};
 
     # We only add CCs, if it is a individual port bug
-    if ($bug->product ne "Ports Tree" ||
+    if ($bug->product ne "Ports & Packages" ||
         $bug->component ne "Individual Port(s)") {
         return;
     }
