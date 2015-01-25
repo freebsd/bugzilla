@@ -19,47 +19,51 @@ sub bug_format_comment {
     my $regexes = $args->{regexes};
 
     push(@$regexes, {
-        match => qr/(?:^|\h+)ports\h+(?:\#|r)?(\d+)/i,
+        match => qr/(^|\h+)ports\h+(?:\#|r)?(\d+)/i,
         replace => \&_link_ports
          });
     push(@$regexes, {
-        match => qr/(?:^|\h+)base\h+(?:\#|r)?(\d+)/i,
+        match => qr/(^|\h+)base\h+(?:\#|r)?(\d+)/i,
         replace => \&_link_base
          });
     push(@$regexes, {
-        match => qr/(?:^|\h+)doc\h+(?:\#|r)?(\d+)/i,
+        match => qr/(^|\h+)doc\h+(?:\#|r)?(\d+)/i,
         replace => \&_link_doc
          });
     push(@$regexes, {
-        match => qr/(?:^|\h+)review\h+(D\d+)/i,
+        match => qr/(^|\h+)review\h+(D\d+)/i,
         replace => \&_link_phabric
          });
 }
 
 sub _link_ports {
-    my $rev = $1 || "";
-    my $link = "<a href=\"" . SVN_PORTS .
+    my $pre = $1 || "";
+    my $rev = $2 || "";
+    my $link = $pre . "<a href=\"" . SVN_PORTS .
         "$rev\" title=\"revision $rev in ports\">ports r$rev</a>";
     return $link;
 }
 
 sub _link_base {
-    my $rev = $1 || "";
-    my $link = "<a href=\"" . SVN_BASE .
+    my $pre = $1 || "";
+    my $rev = $2 || "";
+    my $link = $pre . "<a href=\"" . SVN_BASE .
         "$rev\" title=\"revision $rev in base\">base r$rev</a>";
     return $link;
 }
 
 sub _link_doc {
     my $rev = $1 || "";
-    my $link = "<a href=\"" . SVN_DOC .
+    my $pre = $2 || "";
+    my $link = $pre . "<a href=\"" . SVN_DOC .
         "$rev\" title=\"revision $rev in doc\">doc r$rev</a>";
     return $link;
 }
 
 sub _link_phabric {
-    my $rev = $1 || "";
-    my $link = "<a href=\"" . PHABRIC .
+    my $pre = $1 || "";
+    my $rev = $2 || "";
+    my $link = $pre . "<a href=\"" . PHABRIC .
         "$rev\" title=\"Review $rev on reviews.FreeBSD.org\">review $rev</a>";
     return $link;
 }
