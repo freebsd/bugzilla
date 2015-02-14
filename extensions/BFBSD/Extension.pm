@@ -24,4 +24,20 @@ sub bug_check_can_change_field {
     }
 }
 
+sub auth_verify_methods {
+    my ($self, $args) = @_;
+    my $mods = $args->{'modules'};
+    if (exists $mods->{'FreeBSD'}) {
+	$mods->{'FreeBSD'} = 'Bugzilla/Extension/BFBSD/Auth/Verify.pm';
+    }
+}
+
+sub config_modify_panels {
+    my ($self, $args) = @_;
+    my $panels = $args->{panels};
+    my $auth_params = $panels->{'auth'}->{params};
+    my ($verify_class) = grep($_->{name} eq 'user_verify_class', @$auth_params);
+    push(@{ $verify_class->{choices} }, 'FreeBSD');
+}
+
 __PACKAGE__->NAME;
