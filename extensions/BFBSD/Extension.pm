@@ -7,6 +7,7 @@ use warnings;
 use base qw(Bugzilla::Extension);
 
 use Bugzilla::Constants;
+use Bugzilla::User;
 use Bugzilla::Extension::BFBSD::Helpers;
 
 
