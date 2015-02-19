@@ -32,10 +32,10 @@ BEGIN;
     DELETE FROM namedqueries;
     DELETE FROM profile_search;
     DELETE FROM profile_setting;
-    -- Set the password to 'qaywsx' as SHA-256
+    -- Change cryptpassword to whatever you like
     UPDATE profiles set
         login_name=concat('user', userid, '@test'),
-        cryptpassword='{c8401bf91f73f4058a09a192fab1e6283f1c330038e8a0fabceff8f1b551183{SHA-256}',
+        cryptpassword='',
         realname=concat('User ', userid),
         extern_id=NULL;
     DELETE FROM tokens;
