@@ -16,10 +16,12 @@ use constant {
     INDEX => "INDEX",
     # Needs to be changed to an internal user
     UID_AUTOASSIGN => "bugzilla\@FreeBSD.org",
+    # Bug 196372 - make comments optional
+    DOCOMMENT => 0,
     REASSIGN => 1
 };
 
-our $VERSION = '0.2.0';
+our $VERSION = '0.3.0';
 
 sub install_update_db {
     my ($self, $args) = @_;
@@ -67,7 +69,7 @@ sub bug_end_of_create {
     my @foundports = ();
 
     # Is it a port patch in summary matching ([A-Za-z0-9_-]/[A-Za-z0-9_-])?
-    my @res = ($bug->short_desc =~ /(?:^|[:\s+])([\w-]+\/[\w-]+)(?:[:\s+]|$)/g);
+    my @res = ($bug->short_desc =~ /(?:^|[:\[\s+])([\w-]+\/[\w-]+)(?:[:\]\s+]|$)/g);
     if (@res && scalar(@res) > 0) {
         # warn("Found ports in summary: @res");
         push(@foundports, @res);
@@ -127,8 +129,15 @@ sub _update_bug {
     # Only one maintainer?
     if (scalar(@$maintainers) == 1) {
         my $maintainer = @$maintainers[0];
+        if (_no_maintainer($maintainer)) {
+            Bugzilla->set_user($curuser);
+            return;
+        }
         my $user = _get_user($maintainer);
         if (!$user) {
+            # Maintainer not registered or deactivated, send a mail.
+            _send_mail_to($maintainer, $bug);
+            $bug->add_comment("Maintainer informed via mail");
             Bugzilla->set_user($curuser);
             return;
         }
@@ -161,21 +170,32 @@ sub _update_bug {
             # behaviour of bugzilla is to add the user as CC.
             # We do not need that on reassignments
             $bug->remove_cc($user);
-            $bug->add_comment("Auto-assigned to maintainer $name");
+            if (DOCOMMENT != 0) {
+                $bug->add_comment("Auto-assigned to maintainer $name");
+            }
         } else {
             $bug->add_cc($user);
-            $bug->add_comment("Maintainer CC'd");
+            if (DOCOMMENT != 0) {
+                $bug->add_comment("Maintainer CC'd");
+            }
         }
     } else {
         my $someoneccd = 0;
         foreach my $maintainer (@$maintainers) {
+            if (_no_maintainer($maintainer)) {
+                continue;
+            }
             my $user = _get_user($maintainer);
-            if ($user && $curuser->id != $user->id) {
-                $bug->add_cc($user);
-                $someoneccd = 1;
+            if ($user) {
+                if ($curuser->id != $user->id) {
+                    $bug->add_cc($user);
+                    $someoneccd = 1;
+            } else {
+                # User not registered or deactivated, we won't send
+                # mails to them.
             }
         }
-        if ($someoneccd == 1) {
+        if (DOCOMMENT != 0 && $someoneccd == 1) {
             $bug->add_comment("Maintainers CC'd");
         }
     }
@@ -198,11 +218,15 @@ sub _update_bug {
     Bugzilla->set_user($curuser);
 }
 
-sub _get_user {
+sub _no_maintainer {
     my $maintainer = shift();
     if (lc($maintainer) eq "ports\@freebsd.org") {
-        return;
+        return 1;
     }
+    return 0;
+}
+
+sub _get_user {
     my $uid = login_to_id($maintainer);
     if (!$uid) {
         warn("No user found for $maintainer");
@@ -235,5 +259,35 @@ sub _get_maintainer {
     }
     return;
 }
+
+sub _send_mail_to {
+    my ($maintainer, $bug) = @_;
+    my $mail = "
+From: bugzilla-noreply\@FreeBSD.org
+To: %s
+Subject: %s
+
+Dear FreeBSD port maintainer,
+
+The following problem report was just filed in the FreeBSD Bugzilla
+system, which needs your attention. You can view the report online at
+
+https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=%d
+
+The report contents are as follows.
+
+%s
+
+";
+    my $mailmsg = sprintf(
+        $mail,
+        $maintainer,
+        $bug->short_desc,
+        $bug->id,
+        $bug->comments->[0]->body
+        );
+    MessageToMTA($mailmsg, 1);
+}
+
 
 __PACKAGE__->NAME;
