@@ -190,6 +190,7 @@ sub _update_bug {
                 if ($curuser->id != $user->id) {
                     $bug->add_cc($user);
                     $someoneccd = 1;
+                }
             } else {
                 # User not registered or deactivated, we won't send
                 # mails to them.
@@ -289,6 +290,4 @@ The report contents are as follows.
         );
     MessageToMTA($mailmsg, 1);
 }
-
-
 __PACKAGE__->NAME;
