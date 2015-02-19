@@ -1,7 +1,7 @@
-package Bugzilla::Extension::AutoAssign;
+package Bugzilla::Extension::FBSDAutoAssign;
 use strict;
 
-use constant NAME => 'AutoAssign';
+use constant NAME => 'FBSDAutoAssign';
 
 use constant REQUIRED_MODULES => [
 ];

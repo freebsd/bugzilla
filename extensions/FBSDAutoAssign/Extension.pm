@@ -1,4 +1,4 @@
-package Bugzilla::Extension::AutoAssign;
+package Bugzilla::Extension::FBSDAutoAssign;
 
 use strict;
 use warnings;
@@ -12,11 +12,11 @@ use Bugzilla::Flag;
 use Bugzilla::Mailer;
 use Bugzilla::User;
 
+use Bugzilla::Extension::BFBSD::Helpers;
+
 use constant {
     PORTSDIR => "/home/ports",
     INDEX => "INDEX",
-    # Needs to be changed to an internal user
-    UID_AUTOASSIGN => "bugzilla\@FreeBSD.org",
     # Bug 196372 - make comments optional
     DOCOMMENT => 0,
     REASSIGN => 1
@@ -63,8 +63,8 @@ sub bug_end_of_create {
     my $bug = $args->{'bug'};
 
     # We only add CCs, if it is a individual port bug
-    if ($bug->product ne "Ports & Packages" ||
-        $bug->component ne "Individual Port(s)") {
+    if ($bug->product ne PRODUCT_PORTS ||
+        $bug->component ne COMPONENT_PORTS) {
         return;
     }
     my @foundports = ();
@@ -130,11 +130,11 @@ sub _update_bug {
     # Only one maintainer?
     if (scalar(@$maintainers) == 1) {
         my $maintainer = @$maintainers[0];
-        if (_no_maintainer($maintainer)) {
+        if (no_maintainer($maintainer)) {
             Bugzilla->set_user($curuser);
             return;
         }
-        my $user = _get_user($maintainer);
+        my $user = get_user($maintainer);
         if (!$user) {
             # Maintainer not registered or deactivated, send a mail.
             _send_mail_to($maintainer, $bug);
@@ -183,10 +183,10 @@ sub _update_bug {
     } else {
         my $someoneccd = 0;
         foreach my $maintainer (@$maintainers) {
-            if (_no_maintainer($maintainer)) {
+            if (no_maintainer($maintainer)) {
                 continue;
             }
-            my $user = _get_user($maintainer);
+            my $user = get_user($maintainer);
             if ($user) {
                 if ($curuser->id != $user->id) {
                     $bug->add_cc($user);
@@ -209,7 +209,7 @@ sub _update_bug {
     #  ==> add games@FreeBSD.org as CC
     if (grep { lc($_) eq "games" } @$categories) {
         if (grep { lc($_) eq "ports\@freebsd.org" } @$maintainers) {
-            my $user = _get_user("games\@FreeBSD.org");
+            my $user = get_user("games\@FreeBSD.org");
             if ($user) {
                 $bug->add_cc($user);
             }
@@ -218,29 +218,6 @@ sub _update_bug {
 
     # Switch the user session back.
     Bugzilla->set_user($curuser);
-}
-
-sub _no_maintainer {
-    my $maintainer = shift();
-    if (lc($maintainer) eq "ports\@freebsd.org") {
-        return 1;
-    }
-    return 0;
-}
-
-sub _get_user {
-    my $maintainer = shift();
-    my $uid = login_to_id($maintainer);
-    if (!$uid) {
-        warn("No user found for $maintainer");
-        return;
-    }
-    my $user = new Bugzilla::User($uid);
-    if (!$user->is_enabled) {
-        warn("Found maintainer $maintainer is not enabled in Bugzilla");
-        return;
-    }
-    return $user;
 }
 
 sub _get_maintainer {
