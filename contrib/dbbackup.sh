@@ -1,6 +1,7 @@
 #!/bin/sh
 
 PATH=$PATH:/usr/local/bin
+export PATH
 
 # Path to save the files to
 BACKUPPATH="/var/backup/bugzilla"
