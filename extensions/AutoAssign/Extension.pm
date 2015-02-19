@@ -9,6 +9,7 @@ use Bugzilla::Comment;
 use Bugzilla::Field;
 use Bugzilla::FlagType;
 use Bugzilla::Flag;
+use Bugzilla::Mailer;
 use Bugzilla::User;
 
 use constant {
