@@ -227,6 +227,7 @@ sub _no_maintainer {
 }
 
 sub _get_user {
+    my $maintainer = shift();
     my $uid = login_to_id($maintainer);
     if (!$uid) {
         warn("No user found for $maintainer");
@@ -269,7 +270,7 @@ Subject: %s
 
 Dear FreeBSD port maintainer,
 
-The following problem report was just filed in the FreeBSD Bugzilla
+the following problem report was just filed in the FreeBSD Bugzilla
 system, which needs your attention. You can view the report online at
 
 https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=%d
