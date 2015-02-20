@@ -4,7 +4,7 @@ PATH=$PATH:/usr/local/bin
 export PATH
 
 # Path to save the files to
-BACKUPPATH="/var/backup/bugzilla"
+BACKUPPATH="/var/backups/bugzilla"
 
 # DB to save
 DBNAME="<DBNAME>"
