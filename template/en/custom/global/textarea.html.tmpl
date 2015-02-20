@@ -1,0 +1,86 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%# INTERFACE:
+  #
+  # id:             (optional) The "id"-attribute of the textarea.
+  # name:           (optional) The "name"-attribute of the textarea.
+  # accesskey:      (optional) The "accesskey"-attribute of the textarea.
+  # style:          (optional) The "style"-attribute of the textarea.
+  # classes:        (optional) The "class"-attribute of the textarea.
+  # wrap:           (deprecated; optional) The "wrap"-attribute of the textarea.
+  # disabled:       (optional) Disable the textarea.
+  # readonly:       (optional) Prevent the textarea from being edited.
+  # minrows:        (required) Number of rows the textarea shall have initially
+  #                 and when not having focus.
+  # maxrows:        (optional) Number of rows the textarea shall have if
+  #                 maximized (which happens on getting focus). If not given,
+  #                 the textarea doesn't maximize when getting focus.
+  # defaultrows:    (optional) Number of rows the textarea shall have if
+  #                 the zoom_textareas user preference if off. If not given,
+  #                 minrows will be used.
+  # cols:           (required) Number of columns the textarea shall have.
+  # defaultcontent: (optional) Default content for the textarea.
+  # mandatory:      (optional) Boolean specifying whether or not the textarea
+  #                 is mandatory.
+  #%]
+
+<textarea [% IF name %]name="[% name FILTER html %]"[% END %]
+          [% IF id %] id="[% id FILTER html %]"[% END %]
+          [% IF accesskey %] accesskey="[% accesskey FILTER html %]"[% END %]
+          [% IF style %] style="[% style FILTER html %]"[% END %]
+          [% IF classes %] class="[% classes FILTER html %]"[% END %]
+          [% IF wrap %] wrap="[% wrap FILTER html %]"[% END %]
+          [% IF disabled %] disabled="disabled"[% END %]
+          [% IF readonly %] readonly="readonly"[% END %]
+          [% IF defaultrows && user.settings.zoom_textareas.value == 'off' %]
+            rows="[% defaultrows FILTER html %]"
+          [% ELSE %]
+            rows="[% minrows FILTER html %]"
+          [% END %]
+          cols="[% cols FILTER html %]"
+          [% IF maxrows && user.settings.zoom_textareas.value == 'on' %]
+            onFocus="this.rows=[% maxrows FILTER html %]"
+          [% END %]
+          [% IF mandatory %]
+            aria-required="true"
+          [% END %]
+          [% IF onchange %]
+            onchange="[% onchange FILTER html %]"
+          [% END %]>[% defaultcontent FILTER html %]</textarea>
+[% IF id == 'comment' %]
+  <br>
+  <script type="text/javascript">
+    function fbsd_toggleHelp() {
+      var el = document.getElementById('fbsd_commenthelp');
+      bz_toggleClass(el, 'bz_tui_hidden');
+    };
+  </script>
+  <div style="font-size:90%;">
+    <a href="#" onclick="fbsd_toggleHelp(); return false;">
+      Quick Editing Help
+    </a>
+    <div id="fbsd_commenthelp" class="bz_tui_hidden"
+         style="border:1px solid #000;margin-top:1em;padding:0.5em;background-color:#eee;">
+      <p>To link to other bugs in the description or comment, type
+        <b>bug #<i>NUMBER</i></b>, e.g. <b>bug #17576</b>.</p>
+      <p>To link to another comment within the <em>current</em> bug, type
+       <b>comment #<i>NUMBER</i></b>, e.g. <b>comment #3</b>.</p>
+      <p>To link to a comment within <em>another</em> bug, type
+        <b>bug #<i>NUMBER</i>, comment #<i>NUMBER</i></b>, e.g.
+        <b>bug #17576, comment #2</b>.</p>
+      <p>To link to a SVN commit, use <b>base r<i>NUMBER</i></b> for the
+        base system, <b>ports r<i>NUMBER</i></b> for ports and
+        <b>doc r<i>NUMBER</i></b> for documentation commits, e.g.
+        <b>base r33858</b>.</p>
+      <p>To link to a Diff on <a href="https://reviews.FreeBSD.org">
+        reviews.FreeBSD.org</a>, use <b>review D<i>NUMBER</i></b>, e.g.
+        <b>review D123</b>.</p>
+      </div>
+  </div>
+[% END %]
