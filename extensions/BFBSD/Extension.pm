@@ -7,11 +7,33 @@ use warnings;
 use base qw(Bugzilla::Extension);
 
 use Bugzilla::Constants;
+use Bugzilla::Keyword;
 use Bugzilla::User;
 use Bugzilla::Extension::BFBSD::Helpers;
 
-
 our $VERSION = '0.1.0';
+
+sub install_update_db {
+    my ($self, $args) = @_;
+    my $dbh = Bugzilla->dbh;
+
+    my $kwd = new Bugzilla::Keyword({ name => "patch" });
+    if (!$kwd) {
+        print("Creating 'patch' keyword ...\n");
+        $kwd = Bugzilla::Keyword->create({
+            name => "patch",
+            description => "Contains a patch relevant to resolving the issue. May require testing, review or both.",
+        });
+    }
+    $kwd = new Bugzilla::Keyword({ name => "regression" });
+    if (!$kwd) {
+        print("Creating 'regression' keyword ...\n");
+        $kwd = Bugzilla::Keyword->create({
+            name => "regression",
+            description => "Describes an issue where a feature has stopped functioning as intended, and that previous worked.",
+        });
+    }
+}
 
 sub bug_check_can_change_field {
     my ($self, $args) = @_;
@@ -45,6 +67,17 @@ sub bug_end_of_create {
     my ($self, $args) = @_;
     my $bug = $args->{'bug'};
 
+    # Bug 197683 - add some keywords automatically
+    # Check, if patch or regression is set in the topic.
+    if ($bug->short_desc =~ /\[patch\]|patch:/i) {
+        $bug->modify_keywords("patch", "add")
+    }
+    if ($bug->short_desc =~ /\[regression\]|regression:/i) {
+        $bug->modify_keywords("regression", "add")
+    }
+
+    # Bug 196909 - add $arch CCs for ports bugs with
+    # platform != (amd64, i386)
     # We only add CCs, if it is a individual port bug
     if ($bug->product ne PRODUCT_PORTS ||
         $bug->component ne COMPONENT_PORTS) {
