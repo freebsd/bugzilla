@@ -1,6 +1,27 @@
 [%# News file for the FreeBSD bugzilla instance #%]
 [% news = [
 {
+  date => '2015-02-XX',
+  text => '<ul>
+  <li>The auto assigner will not add comments on adding CCs or reassignments
+    anymore. You can see such changes via the inline history
+    (<a href="userprefs.cgi">General Preferences</a>, <strong>When
+    viewing a bug, show all bug activity</strong>).</li>
+  <li>Ports bugs containing <strong>[category/port]</strong> are
+    recognized again by the auto assigner.</li>
+  <li>The auto assigner will send mails to port maintainers not being
+    signed up for FreeBSD Bugzilla now, if a bug report is submitted.</li>
+  <li>If a ports bug is submitted for a platform, which is not i386 and not amd64,
+    the architecture-specific mailing list (e.g. freebsd-mips or freebsd-ia64)
+    is added to the bug report automatically now.</li>  
+  <li>The <strong>patch</strong> and <strong>regression</strong> keywords
+    are added automatically to bugs, if the title of the bug contains
+    <strong>[patch]</strong> or <strong>patch:</strong> (likewise for
+    regression) on submission.</li>
+  <li>The comment box features a brief editing help now.</li>
+  </ul>'
+},
+{
 date => '2014-12-23',
 text => '<ul>
 <li>Products and Components in the issue tracker have been extensively
