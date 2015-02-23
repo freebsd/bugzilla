@@ -183,9 +183,8 @@ sub _update_bug {
     } else {
         my $someoneccd = 0;
         foreach my $maintainer (@$maintainers) {
-            if (no_maintainer($maintainer)) {
-                continue;
-            }
+            next if no_maintainer($maintainer);
+
             my $user = get_user($maintainer);
             if ($user) {
                 if ($curuser->id != $user->id) {
