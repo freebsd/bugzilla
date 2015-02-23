@@ -1,4 +1,6 @@
- .dashboard {
+
+
+.dashboard {
     background-color: #EEE;
     border: 1px solid #DDD;
     border-collapse: collapse;
@@ -25,5 +27,45 @@
 }
 
 .product {
+    font-weight: bold;
+}
+
+@media (min-width: 64rem) {
+    div#left {
+        float: left;
+        width: 50%;
+        margin-right: 1%;
+    }
+
+    div#requests {
+        float: right;
+        width: 49%;
+    }
+}
+
+.requests {
+    background-color: #EEE;
+    border: 1px solid #DDD;
+    border-collapse: collapse;
+    width: 100%;
+}
+.requests tr th {
+    padding: .5em;
+    border: 1px solid #DDD;
+}
+.requests tr th {
+    white-space: nowrap;
+}
+.requests tr th.expand {
+    width: 99%;
+}
+
+.requests tr td {
+    padding: .5em;
+    white-space: nowrap;
+}
+
+.header {
+    text-align: left;
     font-weight: bold;
 }

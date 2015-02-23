@@ -1,140 +1,197 @@
 [% PROCESS global/variables.none.tmpl %]
 [% PROCESS global/header.html.tmpl
    title = "Dashboard"
-  style_urls = [ "extensions/Dashboard/web/style.css" ]
-  javascript_urls = [ ]
+   style_urls = [ "extensions/Dashboard/web/style.css",
+                  "skins/standard/buglist.css"]
 %]
 
 [% optdays = [ 1, 2, 3, 4, 5, 6, 7, 14, 30, 60, 90, 120, 180, 240, 300, 365 ] %]
 
 <div id="bugzilla-body">
-  <div id="status">
-    <h2>Bug Summary</h2>
-    <p>The bug summary provides a brief overview about the most recently
-      opened and closed bugs for the project and a per-product basis.
-    </p>
-    <form action="page.cgi" method="get">
-      <input type="hidden" name="id" value="dashboard.html" />
-      <p>Day range:
-        <select id="dayselect" name="days">
+  <div>
+    <div id="left">
+      <div id="status">
+        <h2>Bug Summary</h2>
+        <p>The bug summary provides a brief overview about the most recently
+          opened and closed bugs for the project and a per-product basis.
+        </p>
+        <form action="page.cgi" method="get">
+          <input type="hidden" name="id" value="dashboard.html" />
+          <p>Day range:
+            <select id="dayselect" name="days">
 [% FOREACH day IN optdays %]
 [% IF day == days %]
-          <option selected="selected">[% day %]</option>
+              <option selected="selected">[% day %]</option>
 [% ELSE %]
-          <option>[% day %]</option>
+              <option>[% day %]</option>
 [% END %]
 [% END %]
-        </select>
-        <input type="submit" value="Filter" />
-      </p>
-    </form>
-    <table class="dashboard">
-      <thead>
-        <tr>
-          <th class="left">Product</th>
-          <th>Total Open</th>
-          <th>New in the last [% days FILTER html %] days</th>
-          <th>Closed in the last [% days FILTER html %] days</th>
-          </tr>
-      </thead>
-      <tbody>
+            </select>
+            <input type="submit" value="Filter" />
+          </p>
+        </form>
+        <table class="dashboard">
+          <thead>
+            <tr>
+              <th class="left">Product</th>
+              <th>Total Open</th>
+              <th>New in the last [% days FILTER html %] days</th>
+              <th>Closed in the last [% days FILTER html %] days</th>
+            </tr>
+          </thead>
+          <tbody>
 [% FOREACH p IN products %]
-        <tr class="[% IF loop.count() % 2 == 0 %]bz_row_even[% ELSE %]bz_row_odd[% END %]">
-          <td class="product left">
-            <a href="buglist.cgi?product=[% p.name FILTER uri %]">
-              [% p.name FILTER html %]</a>
-          </td>
-          <td>
+            <tr class="[% loop.count() % 2 == 0 ? "bz_row_even" : "bz_row_odd" %]">
+              <td class="product left">
+                <a href="buglist.cgi?product=[% p.name FILTER uri %]">
+                  [% p.name FILTER html %]</a>
+              </td>
+              <td>
 [% IF p.total != 0 %]
-            <a href="buglist.cgi?product=[% p.name FILTER uri %]&amp;bug_status=__open__">[% p.total FILTER html %]</a>
+                <a href="buglist.cgi?product=[% p.name FILTER uri %]&amp;bug_status=__open__">[% p.total FILTER html %]</a>
 [% ELSE %]
-            0
+                0
 [% END %]
-          </td>
-          <td>
+              </td>
+              <td>
 [% IF p.new != 0 %]
-            <a href="buglist.cgi?
+                <a href="buglist.cgi?
 [% FOREACH i IN p.ncrit %]
 &[% i.key %]=[% i.value FILTER uri %]
 [% END %]
 ">[% p.new FILTER html %]</a>
 [% ELSE %]
-            0
+                0
 [% END %]
-          </td>
-          <td>
+              </td>
+              <td>
 [% IF p.closed != 0 %]
-            <a href="buglist.cgi?
+                <a href="buglist.cgi?
 [% FOREACH i IN p.ccrit %]
 &[% i.key %]=[% i.value FILTER uri %]
 [% END %]
 ">[% p.closed FILTER html %]</a>
 [% ELSE %]
-            0
+                0
 [% END %]
-          </td>
-        </tr>
+              </td>
+            </tr>
 [% END %]
-        <tr class="totals">
-          <td class="product left">Total numbers</td>
-          <td>
-            <a href="buglist.cgi?bug_status=__open__">[% totals.total %]</a>
-          </td>
-          <td>
+            <tr class="totals">
+              <td class="product left">Total numbers</td>
+              <td>
+                <a href="buglist.cgi?bug_status=__open__">[% totals.total %]</a>
+              </td>
+              <td>
 [% IF totals.open != 0 %]
-            <a href="buglist.cgi?
+                <a href="buglist.cgi?
 [% FOREACH i IN totals.ncrit %]
 &[% i.key %]=[% i.value FILTER uri %]
 [% END %]
 ">[% totals.new FILTER html %]</a>
 [% ELSE %]
-            0
+                0
 [% END %]
-          </td>
-          <td>
+              </td>
+              <td>
 [% IF totals.closed != 0 %]
-            <a href="buglist.cgi?
+                <a href="buglist.cgi?
 [% FOREACH i IN totals.ccrit %]
 &[% i.key %]=[% i.value FILTER uri %]
 [% END %]
 ">[% totals.closed FILTER html %]</a>
 
 [% ELSE %]
-            0
+                0
 [% END %]
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-  </div>
-  <div id="queries">
-    <h2>Useful Queries</h2>
-    <p>Pre-defined queries to find bugs matching certain criteria.</p>
-    <table class="dashboard">
-      <thead>
-        <tr>
-          <th class="left">Query</th>
-          <th>Bug Count</th>
-      </thead>
-      <tbody>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="queries">
+        <h2>Useful Queries</h2>
+        <p>Pre-defined queries to find bugs matching certain criteria.</p>
+        <table class="dashboard">
+          <thead>
+            <tr>
+              <th class="left">Query</th>
+              <th>Bug Count</th>
+            </tr>
+          </thead>
+          <tbody>
 [% FOREACH q IN queries %]
-        <tr class="[% IF loop.count() % 2 == 0 %]bz_row_even[% ELSE %]bz_row_odd[% END %]">
-          <td class="left">[% q.desc %]</td>
-          <td><a href="buglist.cgi?
+            <tr class="[% loop.count() % 2 == 0 ? "bz_row_even" : "bz_row_odd" %]">
+              <td class="left">[% q.desc %]</td>
+              <td><a href="buglist.cgi?
 [% FOREACH i IN q.crit %]
 &[% i.key %]=[% i.value FILTER uri %]
 [% END %]
 ">[% q.count %]</a></td>
-        </tr>
+            </tr>
 [% END %]
-      </tbody>
-    </table>
+          </tbody>
+        </table>
+      </div>
+    </div> <!-- status & queries -->
 
-    <p>
-      If you should have trouble with the searches or numbers provided, or if
-      you would like to see other predefined searches and metrics,
-      please <a href="enter_bug.cgi?product=Supporting%20Services&component=Bug%20Tracker">file a report</a>.
-    </p>
+    <div id="requests">
+      <h2>Requests to Answer</h2>
+      <p>This is a list of bugs containing requests, which you should react on.</p>
+      <table class="requests">
+        <thead>
+          <tr class="header">
+            <th>Id</th>
+            <th class="expand">Description</th>
+            <th>Flag</th>
+            <th>Requester</th>
+          </tr>
+        </thead>
+        <tbody>
+[% FOREACH bug IN userqueries.requestee %]
+          <tr class="[% loop.count() % 2 == 0 ? "bz_row_even" : "bz_row_odd" %]">
+            <td><a href="show_bug.cgi?id=[% bug.id %]">[% bug.id %]</a></td>
+            <td><a href="show_bug.cgi?id=[% bug.id %]">[% bug.desc %]</a></td>
+            <td>[% bug.flag %]</td>
+            <td>[% bug.requester %]</td>
+          </tr>
+[% END %]
+        </tbody>
+      </table>
+      <h2>Requests Made</h2>
+      <p>This is a list of bugs containing requests, you made and which currently
+         wait for someone else to react on.</p>
+      <table class="requests">
+        <thead>
+          <tr class="header">
+            <th>Id</th>
+            <th class="expand">Description</th>
+            <th>Flag</th>
+            <th>Requestee</th>
+          </tr>
+        </thead>
+        <tbody>
+[% FOREACH bug IN userqueries.setter %]
+[% count = loop.count() %]
+          <tr class="[% loop.count() % 2 == 0 ? "bz_row_even" : "bz_row_odd" %]">
+            <td><a href="show_bug.cgi?id=[% bug.id %]">[% bug.id %]</a></td>
+            <td><a href="show_bug.cgi?id=[% bug.id %]">[% bug.desc %]</a></td>
+            <td>[% bug.flag %]</td>
+            <td>[% bug.requestee %]</td>
+          </tr>
+[% END %]
+        </tbody>
+      </table>
+    </div>
+
+    <div style="clear:both"></div>
+  </div>
+
+  <p>
+    If you should have trouble with the searches or numbers provided, or
+    if you would like to see other predefined searches and metrics,
+    please <a href="enter_bug.cgi?product=Supporting%20Services&component=Bug%20Tracker">file
+    a report</a>.
+  </p>
 </div>
 [% PROCESS global/footer.html.tmpl %]

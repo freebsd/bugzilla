@@ -3,6 +3,7 @@ package Bugzilla::Extension::Dashboard::Util;
 use strict;
 use POSIX qw(strftime);
 use Bugzilla;
+use Bugzilla::Flag;
 use Bugzilla::Search;
 use base qw(Exporter);
 
@@ -12,19 +13,25 @@ use constant {
 
 our @EXPORT = qw(
     open_bugs new_bugs closed_bugs missing_feedback idle_bugs
-    new_ports_bugs commit_ports_bugs mfc_bugs
+    new_ports_bugs commit_ports_bugs mfc_bugs flags_requestee
+    flags_setter
 );
 
 sub _search {
-    my $criteria = shift();
+    my ($criteria, $fields) = @_;
+
+    if (!$fields) {
+        $fields = [ "bug_id" ];
+    }
+
     my $search = new Bugzilla::Search(
-        "fields"          => [ "bug_id" ],
+        "fields"          => $fields,
         "params"          => $criteria,
         "user"            => Bugzilla->user,
         "allow_unlimited" => 1
         );
     my $result = $search->data;
-    return ($criteria, scalar(@$result), \$result);
+    return ($criteria, scalar(@$result), $result);
 }
 
 sub open_bugs {
@@ -177,4 +184,95 @@ sub mfc_bugs {
     } else {
         return _search(\%criteria);
     }
+}
+
+sub flags_requestee {
+    my $critonly = shift();
+
+    my $user = Bugzilla->user;
+    my %criteria = (
+        "f1" => "requestees.login_name",
+        "o1" => "equals",
+        "v1" => $user->login,
+        "bug_status" => "__open__",
+        );
+    if ($critonly) {
+        return \%criteria;
+    }
+
+    # We can't request the login_names, since the SQL query blows up
+    # then. Let's do it manually and push all in a simple array.
+    my @bugs;
+    my $matchedbugs = Bugzilla::Flag->match({
+        status => '?',
+        requestee_id => $user->id
+    });
+    my %bugids = map{$_->bug_id, $_} @$matchedbugs;
+
+    # $matchedbugs won't necessarily contain only bugs, which
+    # match the user preferences, visibility or bug status,
+    # let's sync them with the Bugzilla::Search() result.
+
+    my ($crit, $count, $ids) = _search(
+        \%criteria, ["bug_id", "short_desc"]);
+
+    foreach my $id (@$ids) {
+        my ($bug_id, $desc) = @$id;
+        next if (!$bugids{$bug_id});
+
+        my $flag = $bugids{$bug_id};
+        push(@bugs, {
+            "id"        => $flag->bug_id,
+            "desc"      => $desc,
+            "flag"      => $flag->type->name,
+            "requester" => $flag->setter->login,
+            "requestee" => $flag->requestee ? $flag->requestee->login : '',
+             });
+    }
+    return (\%criteria, scalar(@bugs), \@bugs);
+}
+
+sub flags_setter {
+    my $critonly = shift();
+
+    my $user = Bugzilla->user;
+    my %criteria = (
+        "f1" => "setters.login_name",
+        "o1" => "equals",
+        "v1" => $user->login,
+        "bug_status" => "__open__",
+        );
+    if ($critonly) {
+        return \%criteria;
+    }
+
+    # We can't request the login_names, since the SQL query blows up
+    # then. Let's do it manually and push all in a simple array.
+    my @bugs;
+    my $matchedbugs = Bugzilla::Flag->match({
+        status => '?',
+        setter_id => $user->id
+    });
+    my %bugids = map{$_->bug_id, $_} @$matchedbugs;
+
+    # $matchedbugs won't necessarily contain only bugs, which
+    # match the user preferences, visibility or bug status,
+    # let's sync them with the Bugzilla::Search() result.
+
+    my ($crit, $count, $ids) = _search(
+        \%criteria, ["bug_id", "short_desc"]);
+    foreach my $id (@$ids) {
+        my ($bug_id, $desc) = @$id;
+        next if (!$bugids{$bug_id});
+
+        my $flag = $bugids{$bug_id};
+        push(@bugs, {
+            "id"        => $flag->bug_id,
+            "desc"      => $desc,
+            "flag"      => $flag->type->name,
+            "requester" => $flag->setter->login,
+            "requestee" => $flag->requestee ? $flag->requestee->login : '',
+             });
+    }
+    return (\%criteria, scalar(@bugs), \@bugs);
 }

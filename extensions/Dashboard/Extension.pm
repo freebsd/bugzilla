@@ -81,6 +81,20 @@ sub page_before_template {
     $vars->{days} = $days;
     # Get useful queries
     $vars->{queries} = _predefined_queries($user, $urlbase);
+    $vars->{userqueries} = _user_queries($user, $urlbase);
+}
+
+sub _user_queries {
+    my ($user, $urlbase) = @_;
+    my $result = ();
+
+    my ($criteria, $count, $buglist) = flags_requestee();
+    $result->{requestee} = $buglist;
+
+    ($criteria, $count, $buglist) = flags_setter();
+    $result->{setter} = $buglist;
+
+    return $result;
 }
 
 sub _predefined_queries {
