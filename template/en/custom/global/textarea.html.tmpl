@@ -11,7 +11,6 @@
   # id:             (optional) The "id"-attribute of the textarea.
   # name:           (optional) The "name"-attribute of the textarea.
   # accesskey:      (optional) The "accesskey"-attribute of the textarea.
-  # style:          (optional) The "style"-attribute of the textarea.
   # classes:        (optional) The "class"-attribute of the textarea.
   # wrap:           (deprecated; optional) The "wrap"-attribute of the textarea.
   # disabled:       (optional) Disable the textarea.
@@ -33,7 +32,6 @@
 <textarea [% IF name %]name="[% name FILTER html %]"[% END %]
           [% IF id %] id="[% id FILTER html %]"[% END %]
           [% IF accesskey %] accesskey="[% accesskey FILTER html %]"[% END %]
-          [% IF style %] style="[% style FILTER html %]"[% END %]
           [% IF classes %] class="[% classes FILTER html %]"[% END %]
           [% IF wrap %] wrap="[% wrap FILTER html %]"[% END %]
           [% IF disabled %] disabled="disabled"[% END %]
@@ -48,7 +46,7 @@
             onFocus="this.rows=[% maxrows FILTER html %]"
           [% END %]
           [% IF mandatory %]
-            aria-required="true"
+            aria-required="true" required
           [% END %]
           [% IF onchange %]
             onchange="[% onchange FILTER html %]"
@@ -70,7 +68,7 @@
       <p>To link to other bugs in the description or comment, type
         <b>bug #<i>NUMBER</i></b>, e.g. <b>bug #17576</b>.</p>
       <p>To link to another comment within the <em>current</em> bug, type
-       <b>comment #<i>NUMBER</i></b>, e.g. <b>comment #3</b>.</p>
+        <b>comment #<i>NUMBER</i></b>, e.g. <b>comment #3</b>.</p>
       <p>To link to a comment within <em>another</em> bug, type
         <b>bug #<i>NUMBER</i>, comment #<i>NUMBER</i></b>, e.g.
         <b>bug #17576, comment #2</b>.</p>
@@ -84,3 +82,4 @@
       </div>
   </div>
 [% END %]
+
