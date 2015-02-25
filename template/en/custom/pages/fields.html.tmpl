@@ -8,10 +8,10 @@
 
 [% PROCESS global/header.html.tmpl
   title = "$terms.Bug Fields"
-  style_urls = ['skins/standard/page.css']
+  bodyclasses = ['narrow_page']
 %]
 
-<p>This page describes the various fields that you see
+<p>This page describes the various fields that you see 
   on [% terms.abug %].</p>
 
 <table class="field_value_explanation">
@@ -27,7 +27,7 @@
   </tr>
 
   <tr>
-    <td>The [% field_descs.bug_status FILTER html %] field indicates the
+    <td>The [% field_descs.bug_status FILTER html %] field indicates the 
       current state of a [% terms.bug %]. Only certain status transitions
       are allowed.</td>
 
@@ -44,41 +44,41 @@
     <td>
       <dl>
         <dt class="unconfirmed">
-          [% display_value("bug_status", "New") FILTER html %]
+          [% display_value("bug_status", "UNCONFIRMED") FILTER html %]
         </dt>
-        <dd class="new">
-          This [% terms.bug %] has recently been added to the database.
+        <dd class="unconfirmed">
+          This [% terms.bug %] has recently been added to the database. 
           Nobody has confirmed that this [% terms.bug %] is valid. Users
           who have the "canconfirm" permission set may confirm
-          this [% terms.bug %], changing its state to
-          <b>[% display_value("bug_status", "Open") FILTER html %]</b>.
+          this [% terms.bug %], changing its state to 
+          <b>[% display_value("bug_status", "CONFIRMED") FILTER html %]</b>. 
           Or, it may be directly resolved and marked
-          <b>[% display_value("bug_status", "Closed") FILTER html %]</b>.
+          <b>[% display_value("bug_status", "RESOLVED") FILTER html %]</b>.
         </dd>
 
-        <dt class="open">
-          [% display_value("bug_status", "Open") FILTER html %]
+        <dt class="confirmed">
+          [% display_value("bug_status", "CONFIRMED") FILTER html %]
         </dt>
-        <dd class="open">
+        <dd class="confirmed">
           This [% terms.bug %] is valid and has recently been filed.
-          [%+ terms.Bugs %] in this state become
-          <b>[% display_value("bug_status", "In Progress") FILTER html %]</b>
+          [%+ terms.Bugs %] in this state become 
+          <b>[% display_value("bug_status", "IN_PROGRESS") FILTER html %]</b>
           when somebody is working on them, or become resolved and marked
-          <b>[% display_value("bug_status", "Closed") FILTER html %]</b>.
+          <b>[% display_value("bug_status", "RESOLVED") FILTER html %]</b>.
         </dd>
 
         <dt class="in_progress">
-          [% display_value("bug_status", "In Progress") FILTER html %]
+          [% display_value("bug_status", "IN_PROGRESS") FILTER html %]
         </dt>
         <dd class="in_progress">
           This [% terms.bug %] is not yet resolved, but is assigned to the
           proper person who is working on the [% terms.bug %]. From here,
           [%+ terms.bugs %] can be given to another person and become
-          <b>[% display_value("bug_status", "Open") FILTER html %]</b>, or
-          resolved and become
-          <b>[% display_value("bug_status", "Closed") FILTER html %]</b>.
+          <b>[% display_value("bug_status", "CONFIRMED") FILTER html %]</b>, or
+          resolved and become 
+          <b>[% display_value("bug_status", "RESOLVED") FILTER html %]</b>.
         </dd>
-
+        
         [% Hook.process('open-status') %]
       </dl>
     </td>
@@ -96,14 +96,25 @@
   <tr>
     <td>
       <dl>
-        <dt class="closed">
-          [% display_value("bug_status", "Closed") FILTER html %]
+        <dt class="resolved">
+          [% display_value("bug_status", "RESOLVED") FILTER html %]
         </dt>
-        <dd class="Closed">
-          A resolution has been performed. From here [% terms.bugs %]
-          are reopened and given some open status.
+        <dd class="resolved">
+          A resolution has been performed, and it is awaiting verification by
+          QA. From here [% terms.bugs %] are either reopened and given some
+          open status, or are verified by QA and marked
+          <b>[% display_value("bug_status", "VERIFIED") FILTER html %]</b>.
         </dd>
 
+        <dt class="verified">
+          [% display_value("bug_status", "VERIFIED") FILTER html %]
+        </dt>
+        <dd class="verified">
+          QA has looked at the [% terms.bug %] and the resolution and
+          agrees that the appropriate resolution has been taken. This is
+          the final status for [% terms.bugs %].
+        </dd>
+        
         [% Hook.process('closed-status') %]
       </dl>
     </td>
@@ -114,57 +125,23 @@
           [% display_value("resolution", "FIXED") FILTER html %]
         </dt>
         <dd class="fixed">
-          A fix for this [% terms.bug %] is checked into the tree and
+          A fix for this [% terms.bug %] is checked into the tree and 
           tested.
         </dd>
 
-        <dt class="overcomebyevents">
-          [% display_value("resolution", "Overcome By Events") FILTER html %]
+        <dt class="invalid">
+          [% display_value("resolution", "INVALID") FILTER html %]
         </dt>
-        <dd class="overcomebyevents">
-          The problem described is not relevant anymore, since something
-          else changed in ways to render it obsolete.
+        <dd class="invalid">
+          The problem described is not [% terms.abug %].
         </dd>
 
-        <dt class="worksasintended">
-          [% display_value("resolution", "Works As Intended") FILTER html %]
+        <dt class="wontfix">
+          [% display_value("resolution", "WONTFIX") FILTER html %]
         </dt>
-        <dd class="worksasintended">
-          The problem described is not [% terms.abug %], but wanted.
-        </dd>
-
-        <dt class="notenoughinformation">
-          [% display_value("resolution", "Not Enough Information") FILTER html %]
-        </dt>
-        <dd class="notenoughinformation">
-          Due to insufficient information, the problem can not be
-          recreated, verified or fixed.
-        </dd>
-
-        <dt class="unabletoreproduce">
-          [% display_value("resolution", "Unable To Reproduce") FILTER html %]
-        </dt>
-        <dd class="unabletoreproduce">
-          All attempts at reproducing this [% terms.bug %] were futile,
-          and reading the code produces no clues as to why the described
-          behavior would occur. If more information appears later,
-          the [% terms.bug %] can be reopened.
-        </dd>
-
-        <dt class="rejected">
-          [% display_value("resolution", "Rejected") FILTER html %]
-        </dt>
-        <dd class="rejected">
-          A solution for the problem described, feature wish or change
-          in behaviour is not wanted.
-        </dd>
-
-        <dt class="notabug">
-          [% display_value("resolution", "Not A Bug") FILTER html %]
-        </dt>
-        <dd class="notabug">
-          The problem described is not a [% terms.abug %] and thus will
-          not be fixed.
+        <dd class="wontfix">
+          The problem described is [% terms.abug %] which will never be 
+          fixed.
         </dd>
 
         <dt class="duplicate">
@@ -178,17 +155,16 @@
           next to the resolution.
         </dd>
 
-        <dt class="feedbacktimeout">
-          [% display_value("resolution", "Feedback Timeout") FILTER html %]
+        <dt class="worksforme">
+          [% display_value("resolution", "WORKSFORME") FILTER html %]
         </dt>
-
-        <dd class="feedbacktimeout">
-          Upon trying to get the problem solved, the reporter or a third
-          party did not provide feedback in a timely manner (at least
-          two weeks), so that the reported [% terms.bug %] will not be
-          worked on anymore.
+        <dd class="worksforme">
+          All attempts at reproducing this [% terms.bug %] were futile, 
+          and reading the code produces no clues as to why the described
+          behavior would occur. If more information appears later,
+          the [% terms.bug %] can be reopened.
         </dd>
-
+        
         [% Hook.process('resolution') %]
       </dl>
     </td>
@@ -201,7 +177,7 @@
 [% SET field_help_map = {} %]
 [% FOREACH field = bug_fields.keys %]
   [% SET field_desc = field_descs.$field %]
-  [% field_help_map.$field_desc = { help  => help_html.$field,
+  [% field_help_map.$field_desc = { help  => help_html.$field, 
                                     field => field } %]
 [% END %]
 
@@ -211,10 +187,10 @@
                                  field => "importance" } %]
 
 [%# These are fields that don't need to be documented, either because
-  # they have docs somewhere else in the UI, or they don't show up on bugs.
+  # they have docs somewhere else in the UI, or they don't show up on bugs. 
   # %]
-[% SET skip_fields = [
-  'days_elapsed',
+[% SET skip_fields = [ 
+  'days_elapsed', 
   'everconfirmed',
   'reporter_accessible',
   'cclist_accessible',
@@ -223,13 +199,6 @@
   'owner_idle_time',
   'bug_status',
   'resolution',
-
-  'qa_contact',
-  'qa_contact_realname',
-  'assigned_to_realname',
-  'reporter_realname',
-  'classification',
-
 ] %]
 
 <dl class="field_descriptions">
