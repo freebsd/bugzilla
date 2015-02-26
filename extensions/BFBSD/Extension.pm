@@ -83,7 +83,8 @@ sub bug_end_of_create {
         $bug->component ne COMPONENT_PORTS) {
         return;
     }
-    if ($bug->rep_platform eq "amd64" || $bug->rep_platform eq "i386") {
+    if ($bug->rep_platform eq "amd64" || $bug->rep_platform eq "i386" ||
+        $bug->rep_platform eq "Any") {
         # Do nothing.
         return;
     }
