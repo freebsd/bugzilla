@@ -67,6 +67,15 @@ sub bug_end_of_create {
     my ($self, $args) = @_;
     my $bug = $args->{'bug'};
 
+    # Switch the user session
+    my $autoid = login_to_id(UID_AUTOASSIGN);
+    if (!$autoid) {
+        warn("AutoAssign user does not exist");
+        return;
+    }
+    my $curuser = Bugzilla->user;
+    Bugzilla->set_user(new Bugzilla::User($autoid));
+
     # Bug 197683 - add some keywords automatically
     # Check, if patch or regression is set in the topic.
     if ($bug->short_desc =~ /\[patch\]|patch:/i) {
@@ -78,31 +87,21 @@ sub bug_end_of_create {
 
     # Bug 196909 - add $arch CCs for ports bugs with
     # platform != (amd64, i386)
-    # We only add CCs, if it is a individual port bug
-    if ($bug->product ne PRODUCT_PORTS ||
-        $bug->component ne COMPONENT_PORTS) {
-        return;
-    }
-    if ($bug->rep_platform eq "amd64" || $bug->rep_platform eq "i386" ||
-        $bug->rep_platform eq "Any") {
-        # Do nothing.
-        return;
-    }
+    # We only add CCs, if it is an individual port bug
+    if ($bug->product eq PRODUCT_PORTS &&
+        $bug->component eq COMPONENT_PORTS) {
+        if ($bug->rep_platform ne "amd64" &&
+            $bug->rep_platform ne "i386" &&
+            $bug->rep_platform ne "Any") {
 
-    # Switch the user session
-    my $autoid = login_to_id(UID_AUTOASSIGN);
-    if (!$autoid) {
-        warn("AutoAssign user does not exist");
-        return;
+            my $archuser = sprintf("freebsd-%s\@FreeBSD.org",
+                                   $bug->rep_platform);
+            my $user = get_user($archuser);
+            if ($user) {
+                $bug->add_cc($user);
+            };
+        }
     }
-    my $curuser = Bugzilla->user;
-    Bugzilla->set_user(new Bugzilla::User($autoid));
-    my $archuser = sprintf("freebsd-%s\@FreeBSD.org",
-                           $bug->rep_platform);
-    my $user = get_user($archuser);
-    if ($user) {
-        $bug->add_cc($user);
-    };
     Bugzilla->set_user($curuser);
 }
 

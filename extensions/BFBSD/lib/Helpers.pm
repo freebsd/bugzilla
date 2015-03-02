@@ -20,7 +20,6 @@ use constant {
     COMPONENT_PORTS => "Individual Port(s)"
 };
 
-
 sub ports_product {
     return PRODUCT_PORTS
 }
