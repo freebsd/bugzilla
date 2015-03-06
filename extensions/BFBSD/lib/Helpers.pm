@@ -8,14 +8,15 @@ use base qw(Exporter);
 
 our @EXPORT = qw(
     no_maintainer get_user ports_product ports_component
+    switch_to_automation
 
-    UID_AUTOASSIGN
+    UID_AUTOMATION
     PRODUCT_PORTS
     COMPONENT_PORTS
 );
 
 use constant {
-    UID_AUTOASSIGN => "bugzilla\@FreeBSD.org",
+    UID_AUTOMATION => "bugzilla\@FreeBSD.org",
     PRODUCT_PORTS => "Ports & Packages",
     COMPONENT_PORTS => "Individual Port(s)"
 };
@@ -50,5 +51,17 @@ sub get_user {
     }
     return $user;
 }
+
+sub switch_to_automation {
+    # Switch the user session
+    my $autoid = login_to_id(UID_AUTOMATION);
+    if (!$autoid) {
+        warn("Automation user does not exist");
+        return;
+    }
+    my $curuser = Bugzilla->user;
+    Bugzilla->set_user(new Bugzilla::User($autoid));
+    return $curuser;
+};
 
 1;

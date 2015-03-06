@@ -119,13 +119,8 @@ sub _update_bug {
     my ($bug, $maintainers, $categories) = @_;
 
     # Switch the user session
-    my $autoid = login_to_id(UID_AUTOASSIGN);
-    if (!$autoid) {
-        warn("AutoAssign user does not exist");
-        return;
-    }
-    my $curuser = Bugzilla->user;
-    Bugzilla->set_user(new Bugzilla::User($autoid));
+    my $curuser = switch_to_automation();
+    return if !defined($curuser);
 
     # Only one maintainer?
     if (scalar(@$maintainers) == 1) {

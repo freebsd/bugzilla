@@ -68,13 +68,8 @@ sub bug_end_of_create {
     my $bug = $args->{'bug'};
 
     # Switch the user session
-    my $autoid = login_to_id(UID_AUTOASSIGN);
-    if (!$autoid) {
-        warn("AutoAssign user does not exist");
-        return;
-    }
-    my $curuser = Bugzilla->user;
-    Bugzilla->set_user(new Bugzilla::User($autoid));
+    my $curuser = switch_to_automation();
+    return if !defined($curuser);
 
     # Bug 197683 - add some keywords automatically
     # Check, if patch or regression is set in the topic.
