@@ -1,0 +1,28 @@
+[%
+    title = "Spam Deletion"
+    desc = "Configure the Spam Deletion"
+%]
+
+[% param_descs = {
+spam_backupfolder =>
+  "This is the root folder for backups of deleted bugs. " _
+  "Each bug that is deleted, will be stored as text dump " _
+  "file <i>'folder/spam_deleted_bug_id'</i> into that folder, " _
+  "e.g. 'spam/spam_bug_192664'. The folder's location is relative " _
+  "to Bugzilla's data directory.",
+spam_contacts =>
+  "A comma-separated list of email adresses, which " _
+  "shall be notified about a user being blocked by " _
+  "the Spam Deletion extension, besides the " _
+  "<b>maintainer</b>. The email will contain " _
+  "the login of the user being blocked and a brief " _
+  "overview about the deleted bugs.",
+spam_delete_group =>
+  "Users in this group will be allowed to mark other users as " _
+  "spammers.",
+spam_disable_text =>
+  "This message will be displayed to the user when they try to log " _
+  "in after their account has been disabled by the Spam Deletion " _
+  "extension."
+}
+%]

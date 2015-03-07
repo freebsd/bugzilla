@@ -1,0 +1,11 @@
+[% PROCESS global/variables.none.tmpl %]
+[% PROCESS global/header.html.tmpl
+   title = "Block Spammers"
+   style_urls = [ "extensions/SpamDelete/web/style.css",
+                  "skins/standard/buglist.css"]
+%]
+
+<div id="bugzilla-body">
+  <h1>Spammer deleted</h1>
+  <p>The user [% spamuser %] was blocked and his bugs were deleted.</p>
+</div>

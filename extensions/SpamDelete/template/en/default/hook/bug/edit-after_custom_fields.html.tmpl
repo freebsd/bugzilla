@@ -1,0 +1,10 @@
+[% RETURN UNLESS user.in_group(Bugzilla.params.spam_delete_group) %]
+[% RETURN UNLESS user.login != bug.reporter.login %]
+[% RETURN UNLESS !bug.reporter.in_group(Bugzilla.params.spam_delete_group) %]
+<tr>
+  <td class="field_label">
+  </td>
+  <td>
+    <a href="page.cgi?id=searchspam.html&user=[% bug.reporter.login FILTER email %]">Mark Reporter as Spammer</a>
+  </td>
+</tr>

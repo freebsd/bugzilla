@@ -1,0 +1,68 @@
+[% PROCESS global/variables.none.tmpl %]
+[% PROCESS global/header.html.tmpl
+   title = "Block Spammers"
+   style_urls = [ "extensions/SpamDelete/web/style.css",
+                  "skins/standard/buglist.css"]
+%]
+
+<div id="bugzilla-body">
+  <h1>Delete Spammers</h1>
+  <p>
+    The following page lets you block users, who create unsolicited bug
+    reports, such as advertisements (aka spam). The users will be
+    blocked (not deleted), and all bugs reported filed by them will be
+    deleted from [% terms.Bugzilla %].
+  </p>
+  <div id="search">
+    <form action="page.cgi" method="get">
+      <input type="hidden" name="id" value="searchspam.html" />
+      <input type="hidden" name="action" value="search" />
+      <span>
+        <label for="user">User:</label>
+        <input type="text" name="user" id="user" size="30"
+[% IF Bugzilla.cgi.param("user") %]
+               value="[% Bugzilla.cgi.param("user") %]"
+[% END %]
+               />
+      </span>
+      <input type="submit" value="Search" />
+    </form>
+  </div>
+[% IF Bugzilla.cgi.param("user") %]
+  <div>
+    <p>The following bugs were filed by [% Bugzilla.cgi.param("user") FILTER html %] and will be deleted.</p>
+    <table id="deletebugs">
+      <thead>
+        <tr class="header">
+          <th>Id</th>
+          <th>Product</th>
+          <th>Component</th>
+          <th class="expand">Description</th>
+        </tr>
+      </thead>
+      <tbody>
+[% FOREACH bug = bugs %]
+<tr class="[% loop.count() % 2 == 0 ? "bz_row_even" : "bz_row_odd" %]">
+          <td><a href="show_bug.cgi?id=[% bug.0 %]">[% bug.0 %]</a></td>
+          <td>[% bug.1 %]</td>
+          <td>[% bug.2 %]</td>
+          <td><a href="show_bug.cgi?id=[% bug.0 %]">[% bug.3 %]</a></td>
+        </tr>
+[% END %]
+      </tbody>
+    </table>
+    <p>
+      Do you really want to block the user and delete all bug
+      reports?
+    </p>
+    <form method="post" action="page.cgi" id="deleteForm">
+      <input type="hidden" name="id" value="deletespam.html" />
+      <input type="hidden" name="user"
+             value="[% Bugzilla.cgi.param("user") %]" />
+      <input type="submit" name="action" value="Block User" />
+      <input type="submit" name="action" value="Block and Delete" />
+    </form>
+
+  </div>
+[% END %]
+</div>
