@@ -70,7 +70,6 @@ sub _search_user {
     my $vars = $args->{vars};
     my $cgi = Bugzilla->cgi;
 
-    warn("YADDDA22321321321");
     if (!defined($cgi->param("user")) || $cgi->param("user") eq "") {
         # No user
         return;
@@ -78,11 +77,9 @@ sub _search_user {
     # Search for a user
     my $spamuser = get_user($cgi->param("user"));
     if (!$spamuser) {
-        warn("YADDDA111111");
         ThrowUserError("invalid_user", { user_login => $cgi->param("user") });
     }
 
-    warn("YADDDA");
     $vars->{bugs} = _get_bugs($spamuser);
 }
 

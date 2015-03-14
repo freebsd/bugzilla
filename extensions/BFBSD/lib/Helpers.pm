@@ -38,16 +38,18 @@ sub no_maintainer {
 }
 
 sub get_user {
-    my $name = shift();
+    my ($name, $enabledonly) = @_;
     my $uid = login_to_id($name);
     if (!$uid) {
         warn("No user found for $name");
         return;
     }
     my $user = new Bugzilla::User($uid);
-    if (!$user->is_enabled) {
-        warn("Found user $name is not enabled in Bugzilla");
-        return;
+    if ($enabledonly) {
+        if (!$user->is_enabled) {
+            warn("Found user $name is not enabled in Bugzilla");
+            return;
+        }
     }
     return $user;
 }

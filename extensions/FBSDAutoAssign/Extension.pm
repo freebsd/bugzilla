@@ -129,7 +129,7 @@ sub _update_bug {
             Bugzilla->set_user($curuser);
             return;
         }
-        my $user = get_user($maintainer);
+        my $user = get_user($maintainer, 1);
         if (!$user) {
             # Maintainer not registered or deactivated, send a mail.
             _send_mail_to($maintainer, $bug);
@@ -180,7 +180,7 @@ sub _update_bug {
         foreach my $maintainer (@$maintainers) {
             next if no_maintainer($maintainer);
 
-            my $user = get_user($maintainer);
+            my $user = get_user($maintainer, 1);
             if ($user) {
                 if ($curuser->id != $user->id) {
                     $bug->add_cc($user);
@@ -203,7 +203,7 @@ sub _update_bug {
     #  ==> add games@FreeBSD.org as CC
     if (grep { lc($_) eq "games" } @$categories) {
         if (grep { lc($_) eq "ports\@freebsd.org" } @$maintainers) {
-            my $user = get_user("games\@FreeBSD.org");
+            my $user = get_user("games\@FreeBSD.org", 1);
             if ($user) {
                 $bug->add_cc($user);
             }

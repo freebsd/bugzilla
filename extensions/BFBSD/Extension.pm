@@ -91,7 +91,7 @@ sub bug_end_of_create {
 
             my $archuser = sprintf("freebsd-%s\@FreeBSD.org",
                                    $bug->rep_platform);
-            my $user = get_user($archuser);
+            my $user = get_user($archuser, 1);
             if ($user) {
                 $bug->add_cc($user);
             };
