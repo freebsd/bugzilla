@@ -32,6 +32,10 @@ sub page_before_template {
     my ($self, $args) = @_;
     my $page = $args->{page_id};
 
+    if ($page ne "searchspam.html" && $page ne "deletespam.html") {
+        return;
+    }
+
     Bugzilla->login(LOGIN_REQUIRED);
     if (!Bugzilla->user->in_group(Bugzilla->params->{spam_delete_group})) {
         ThrowUserError("auth_failure", {
