@@ -1,0 +1,15 @@
+[% PROCESS global/variables.none.tmpl %]
+[% PROCESS global/header.html.tmpl
+   title = report.title
+   style_urls = [ "extensions/Reporting/web/style.css" ]
+%]
+
+<div id="bugzilla-body">
+  <h2>[% report.title %]</h2>
+  <p>[% report.desc %]</p>
+  <div id="graph">
+[% FOREACH image IN images %]
+    <img src="[% image.url %]" title="[% image.title %]" />
+[% END %]
+  </div>
+</div>

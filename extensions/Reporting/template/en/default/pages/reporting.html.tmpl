@@ -1,0 +1,20 @@
+[% PROCESS global/variables.none.tmpl %]
+[% PROCESS global/header.html.tmpl
+   title = "Reports"
+%]
+
+<div id="bugzilla-body">
+  <h2>Reports</h2>
+  <p>TODO</p>
+
+  <ul>
+[% FOREACH r IN reports %]
+    <li>
+      <a href="page.cgi?id=showreport.html&type=[% r.type FILTER html %]">
+        [% r.desc FILTER html %]</a>
+    </li>
+[% END %]
+  </ul>
+</div>
+
+[% PROCESS global/footer.html.tmpl %]

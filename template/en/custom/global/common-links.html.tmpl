@@ -28,14 +28,14 @@
         no_redirect.value = 1;
       }
     </script>
-    <input class="txt" type="text" id="quicksearch[% qs_suffix FILTER html %]" name="quicksearch" 
+    <input class="txt" type="text" id="quicksearch[% qs_suffix FILTER html %]" name="quicksearch"
            title="Quick Search" value="[% quicksearch FILTER html %]">
-    <input class="btn" type="submit" value="Search" 
+    <input class="btn" type="submit" value="Search"
            id="find[% qs_suffix FILTER html %]">
     [%-# Work around FF bug: keep this on one line %]</form>
   <a href="page.cgi?id=quicksearch.html" title="Quicksearch Help">[?]</a></li>
 
-  <li><span class="separator">| </span><a href="report.cgi">Reports</a></li>
+  <li><span class="separator">| </span><a href="page.cgi?id=reporting.html">Reports</a></li>
 
   [% Hook.process("fbsd-links") %]
 
@@ -67,9 +67,9 @@
       [% END %]
     [%-# Work around FF bug: keep this on one line %]</li>
   [% ELSE %]
-  
+
     [% PROCESS link_to_documentation %]
-    
+
     [% IF Param('createemailregexp')
           && user.authorizer.user_can_create_account %]
       <li id="new_account_container[% qs_suffix FILTER html %]">
@@ -79,9 +79,9 @@
     [% END %]
 
     [%# Only display one login form when we're on a LOGIN_REQUIRED page. That
-      # way, we're guaranteed that the user will use the form that has 
+      # way, we're guaranteed that the user will use the form that has
       # hidden_fields in it (the center form) instead of this one. Also, it's
-      # less confusing to have one form (as opposed to  three) when you're 
+      # less confusing to have one form (as opposed to  three) when you're
       # required to log in.
       #%]
     [% IF user.authorizer.can_login && !Bugzilla.page_requires_login %]
