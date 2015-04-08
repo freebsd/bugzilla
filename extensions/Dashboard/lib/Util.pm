@@ -58,7 +58,6 @@ sub new_bugs {
     my $ts = strftime("%Y-%m-%d", localtime($back));
 
     my %criteria = (
-        "bug_status" => "__open__",
         "f1" => "creation_ts",
         "o1" => "greaterthaneq",
         "v1" => $ts
