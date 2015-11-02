@@ -6,9 +6,9 @@ use warnings;
 use base qw(Bugzilla::Extension);
 
 use constant {
-    SVN_PORTS => "http://svnweb.freebsd.org/changeset/ports/",
-    SVN_BASE => "http://svnweb.freebsd.org/changeset/base/",
-    SVN_DOC => "http://svnweb.freebsd.org/changeset/doc/",
+    SVN_PORTS => "https://svnweb.freebsd.org/changeset/ports/",
+    SVN_BASE => "https://svnweb.freebsd.org/changeset/base/",
+    SVN_DOC => "https://svnweb.freebsd.org/changeset/doc/",
     PHABRIC => "https://reviews.freebsd.org/",
 };
 
