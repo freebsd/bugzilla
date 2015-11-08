@@ -63,7 +63,7 @@ sub get_chart_file {
     my $recreate = 1;
     if (-e $imgfile) {
         # For debugging purposes: change to 1
-        $recreate = 1;
+        $recreate = 0;
     }
     return ($imgfile, $imgurl, $recreate);
 }

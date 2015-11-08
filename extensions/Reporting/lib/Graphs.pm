@@ -21,7 +21,7 @@ sub total_bugs_over_time {
         "y_label" => "Count",
     );
 
-    my ($labels, $datasets) = bugs_per_time();
+    my ($labels, $datasets) = bugs_over_time();
     my ($name, $url, $create) = get_chart_file($args->{file});
 
     if ($create != 0) {
@@ -39,7 +39,7 @@ sub total_bugs_per_product_over_time {
         "y_label" => "Count",
     );
 
-    my ($labels, $datasets) = bugs_per_time_per_product();
+    my ($labels, $datasets) = bugs_over_time_per_product();
     my %products = map { $_ => 1 } @{ $args->{products} };
 
     # Delete all products not being requested.
@@ -63,7 +63,7 @@ sub total_open_bugs_over_time {
         "x_label" => "Date",
         "y_label" => "Count",
     );
-    my ($labels, $datasets) = bugs_per_time_per_status();
+    my ($labels, $datasets) = bugs_over_time_per_status();
     delete $datasets->{"Closed"};
 
     # Melt the datasets - we jut want to have a single one.

@@ -66,14 +66,15 @@ sub get_reports {
                 file => "total_open_bugs_over_time"
             }
         },
-        {
-            title => "Total open number of bugs per product",
-            type  => "total_open_bugs_per_product_over_time",
-            desc  => "Total open number of bugs over time per product",
-            func  => \&total_open_bugs_per_product_over_time,
-            args => {
-                file => "total_open_bugs_per_product_over_time"
-            }
+# TODO: not implemented yet
+#        {
+#            title => "Total open number of bugs per product",
+#            type  => "total_open_bugs_per_product_over_time",
+#            desc  => "Total open number of bugs over time per product",
+#            func  => \&total_open_bugs_per_product_over_time,
+#            args => {
+#                file => "total_open_bugs_per_product_over_time"
+#            }
         },
     ];
 }

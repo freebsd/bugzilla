@@ -4,11 +4,11 @@ use strict;
 use Bugzilla;
 use base qw(Exporter);
 our @EXPORT = qw(
-    bugs_per_time bugs_per_time_per_product bugs_per_product
-    bugs_per_status_per_product bugs_per_time_per_status
+    bugs_over_time bugs_over_time_per_product bugs_per_product
+    bugs_per_status_per_product bugs_over_time_per_status
 );
 
-sub bugs_per_time {
+sub bugs_over_time {
     my $dbh = Bugzilla->dbh;
     my $query = q{
 SELECT   bugs.creation_ts::date AS bdate,
@@ -35,7 +35,7 @@ GROUP BY bdate;
     return (\@xlabels, $dataset);
 }
 
-sub bugs_per_time_per_product {
+sub bugs_over_time_per_product {
     my $dbh = Bugzilla->dbh;
     my @products = @{ $dbh->selectall_arrayref(qq{
 SELECT name FROM products;
@@ -133,7 +133,7 @@ ORDER BY products.name, bug_status;
     return (\@xlabels, $datasets);
 }
 
-sub bugs_per_time_per_status {
+sub bugs_over_time_per_status {
     my $dbh = Bugzilla->dbh;
     my @status = @{ $dbh->selectall_arrayref(qq{
 SELECT value FROM bug_status;
@@ -186,6 +186,35 @@ ORDER BY bdate, added, removed;
         push(@$data, $curvals->{$key});
     }
     return (\@xlabels, $datasets);
+}
+
+sub bugs_over_time_per_product_per_status {
+    my $dbh = Bugzilla->dbh;
+    my @status = @{ $dbh->selectall_arrayref(qq{
+SELECT value FROM bug_status;
+}, { Slice => {} }) };
+    my @products = @{ $dbh->selectall_arrayref(qq{
+SELECT id, name FROM products ORDER BY id;
+}, undef)};
+my $query = q{
+SELECT bdate, added, removed, count(bdate) AS amount
+FROM   (
+  SELECT bugs.creation_ts::date AS bdate, 'New'::varchar(255) AS added, NULL as removed
+  FROM bugs WHERE bugs.product_id = ?
+  UNION ALL
+  SELECT bugs_activity.bug_when::date as bdate, bugs_activity.added, bugs_activity.removed
+  FROM bugs_activity JOIN bugs ON (bugs_activity.bug_id = bugs.bug_id AND bugs.product_id = ?)
+  WHERE fieldid = (SELECT id FROM fielddefs WHERE name = 'bug_status')
+) AS data
+GROUP BY bdate, added, removed
+ORDER BY bdate, added, removed
+};    
+
+    foreach my $rec (@products) {
+        my $id = @$rec[0];
+        my $name = @$rec[1];
+        my $bugs = $dbh->selectall_arrayref($query, undef, $id, $id);
+    }
 }
 
 1;
