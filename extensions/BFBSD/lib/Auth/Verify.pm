@@ -11,6 +11,9 @@ our @ISA = qw(Bugzilla::Auth::Verify::LDAP);
 sub check_credentials {
     my ($self, $params) = @_;
 
+    if ($params->{username} =~ /.+\@FreeBSD\.org$/i) {
+        $params->{username} =~ s/\@.+$//;
+    }
     $params = Bugzilla::Auth::Verify::LDAP::check_credentials($self, $params);
     if ($params->{failure}) {
         return $params;
