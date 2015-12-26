@@ -75,7 +75,7 @@ sub get_reports {
 #            args => {
 #                file => "total_open_bugs_per_product_over_time"
 #            }
-        },
+#        },
     ];
 }
     # Bars:
