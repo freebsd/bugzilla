@@ -13,8 +13,7 @@ use constant {
     WAIT => 7
 };
 
-my $MAIL = "
-From: bugzilla-noreply\@FreeBSD.org
+my $MAIL = "From: bugzilla-noreply\@FreeBSD.org
 To: %s
 Subject: Problem reports for %s that need special attention
 
@@ -120,13 +119,13 @@ foreach my $mail (keys %bugs) {
         my ($id, $desc, $status, $mail__, @assignedto) = @$bug;
         $tblbugs .= sprintf($TBLROW, $status, $id, $desc);
     }
-    my $mailmsg = sprintf(
+    my $mailmsg = Email::MIME->new(sprintf(
         $MAIL,
         $mail, # To
         $mail, # Subject
         $tblbugs,
         $bugcount
-        );
+        ));
     # Send the mail via the bugzilla configuration.
     MessageToMTA($mailmsg, 1);
     #print($mailmsg);
