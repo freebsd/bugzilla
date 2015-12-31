@@ -16,6 +16,7 @@ our @EXPORT = qw(
     COMPONENT_PORTS
     PORTSDIR
     INDEX
+    PORT_CAT_LIST
 );
 
 use constant {
@@ -26,6 +27,7 @@ use constant {
 #XXX Mokhi added inorder to avoid duplicated codes :)
     PORTSDIR => "/usr/ports-dev",
     INDEX => "INDEX",
+    PORT_CAT_LIST => "accessibility|arabic|archivers|astro|audio|benchmarks|biology|cad|chinese|comms|converters|databases|deskutils|devel|distfiles|dns|editors|emulators|finance|french|ftp|games|german|graphics|hebrew|hungarian|irc|japanese|java|korean|lang|mail|math|misc|multimedia|net|net\-im|net\-mgmt|net\-p2p|news|packages|palm|polish|ports\-mgmt|portuguese|print|russian|science|security|shells|sysutils|textproc|ukrainian|vietnamese|www|x11|x11\-clocks|x11\-drivers|x11\-fm|x11\-fonts|x11\-servers|x11\-themes|x11\-toolkits|x11\-wm",
 };
 
 sub ports_product {
@@ -80,7 +82,8 @@ sub get_maintainers_of_bug {
 	my @foundports = ();
 
 	# Is it a port in summary matching ([A-Za-z0-9_-]/[A-Za-z0-9_-])?
-	my @res = ($bug->short_desc =~ /(?:^|[:\[\s+])([\w-]+\/[\w-\.]+)(?:[:\]\s+]|$)/g);
+	#my @res = ($bug->short_desc =~ /(?:^|[:\[\s+])([\w-]+\/[\w-\.]+)(?:[:\]\s+]|$)/g);
+	my @res = ($bug->short_desc =~ /(?:^|\W)((${\(PORT_CAT_LIST)})\/([\w\-\+](\.(?=\w))*)+)(?:$|\b)*/g);
 	if (@res && scalar(@res) > 0) {
 		# warn("Found ports in summary: @res");
 		push(@foundports, @res);
@@ -91,7 +94,8 @@ sub get_maintainers_of_bug {
 		# Is it a port in the description matching
 		#  ([A-Za-z0-9_-]/[A-Za-z0-9_-])?
 		my $first = $bug->comments->[0]->body;
-		@res = ($first =~ /(?:^|[:,\s+])([\w-]+\/[\w-\.]+)(?:[:,\s+]|$)/g);
+		#@res = ($first =~ /(?:^|[:,\s+])([\w-]+\/[\w-\.]+)(?:[:,\s+]|$)/g);
+		@res = ($first =~ /(?:^|\W)((${\(PORT_CAT_LIST)})\/([\w\-\+](\.(?=\w))*)+)(?:$|\b)*/g);
 		if (@res && scalar(@res) > 0) {
 			# warn("Found ports in description: @res");
 			push(@foundports, @res);
