@@ -53,8 +53,8 @@ sub _link_base {
 }
 
 sub _link_doc {
-    my $rev = $1 || "";
-    my $pre = $2 || "";
+    my $pre = $1 || "";
+    my $rev = $2 || "";
     my $link = $pre . "<a href=\"" . SVN_DOC .
         "$rev\" title=\"revision $rev in doc\">doc r$rev</a>";
     return $link;
