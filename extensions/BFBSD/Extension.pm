@@ -83,10 +83,10 @@ sub bug_end_of_create {
     # Bug 196909 - add $arch CCs for ports bugs with
     # platform != (amd64, i386)
     # We only add CCs, if it is a individual port bug
-    if ($bug->product ne PRODUCT_PORTS ||
-        $bug->component ne COMPONENT_PORTS) {
-        if ($bug->rep_platform eq "amd64" || $bug->rep_platform eq "i386" ||
-            $bug->rep_platform eq "Any") {
+    if ($bug->product eq PRODUCT_PORTS &&
+        $bug->component eq COMPONENT_PORTS) {
+        if ($bug->rep_platform ne "amd64" && $bug->rep_platform ne "i386" &&
+            $bug->rep_platform ne "Any") {
 
             my $archuser = sprintf("freebsd-%s\@FreeBSD.org",
                                    $bug->rep_platform);
