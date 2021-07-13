@@ -1,6 +1,52 @@
 [%# News file for the FreeBSD bugzilla instance #%]
 [% news = [
 {
+  date => '2021-01-24',
+  text => '<ul>
+  <li>To reflect the prelease state of FreeBSD 13.0, the following were
+    done: 
+    <ul>
+      <li>Version 13.0-STABLE of product Base System was created.</li>
+      <li>The flag type mfc-stable13 was created.</li>
+    </ul>
+  <li>As support for them has ended, Base System versions 12.0-RELEASE 
+    and 12.0-STABLE were disabled for new bugs.</li>
+  <li>Hardware value sparc64 has been disabled for new bugs.</li>
+  </ul>'
+},
+{
+  date => '2020-07-12',
+  text => '<ul>
+  <li>In order to lay the groundwork for future changes/improvements,
+    and to make it easier to search for things that are not assigned,
+    we have modified the <code>Real Name</code> of all bugzilla accounts
+    that are default assignees as such:<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<code>Assignee: freebsd-net (Nobody)</code>.<br>
+    This is to make it more obvious that default assignees are assigned to
+    <code>Nobody</code> and encourages self-assignment (to real people) to
+    make resolution more consistent.</li>
+  </ul>'
+},
+{
+  date => '2020-07-11',
+  text => '<ul>
+  <li>To help support the 202007 Bug Squash, all of the PRs containing
+    patches were audited so that:
+    <ul>
+      <li>Each attachment that has its <code>Patch</code> flag set has
+        been verified to contain a patch.</li>
+      <li>If an attachment filename ends in <code>.diff</code> or
+        <code>.patch</code>, its <code>Patch</code> flag has been
+        verified to be set.</li>
+      <li>The remaining attachment filenames end in <code>.shar</code>.</li>
+    </ul>
+  </li>
+  <li>This officially obsoletes the use of the the <code>Keywords</code>
+    field value of <code>patch</code>.  This value had to be added by hand
+    and as a result was applied inconsistently.</li>
+  </ul>'
+},
+{
   date => '2018-05-11',
   text => '<ul>
   <li>Bugzilla was update to 5.0.4 (See <a href="show_bug.cgi?id=228182">228182</a>).</li>
