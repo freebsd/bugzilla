@@ -1,6 +1,40 @@
 [%# News file for the FreeBSD bugzilla instance #%]
 [% news = [
 {
+  date => '2023-12-17',
+  text => '<ul>
+  <li>The weekly reminder script was belatedly updated to:
+    <ul>
+      <li>deselect mfc-stable8 through 11.</li>
+      <li>select mfc-stable12 through 14.</li>
+    </ul> 
+  <li>The Dashboard MFC query was belatedly fixed as above.</li>
+  <li>Note that mfc-stable12 will be removed 20240101.</li>
+  </ul>'
+},
+{
+  date => '2023-11-30',
+  text => '<ul>
+    <li>A stale query was removed from the Dashboard (PR 215844).</li>
+    <li><code>max_search_results</code> was updated from 10000 to 12500.
+      This was limiting the totals from certain queries.</li>
+  </ul>'
+},
+{
+  date => '2023-08-30',
+  text => '<ul>
+  <li>To reflect the prelease state of FreeBSD 14.0, the following were
+    done:
+    <ul>
+      <li>Version 14.0-STABLE of product Base System was created.</li>
+      <li>Version 15.0-CURRENT of product Base System was created.</li>
+      <li>The flag type mfc-stable14 was created.</li>
+    </ul>
+  <li>As support for them has ended, Base System versions 12.0-*, 12.1-*,
+    12.2-*, 12.3-*, 13.0-*, and 13.1-* were disabled for new bugs.</li>
+  </ul>'
+},
+{
   date => '2021-01-24',
   text => '<ul>
   <li>To reflect the prelease state of FreeBSD 13.0, the following were
