@@ -122,11 +122,12 @@ sub _predefined_queries {
             "func" => \&new_ports_bugs,
             "args" => undef
         },
-        {
-            "desc" => "Ports bugs, that are ready to be taken by a committer",
-            "func" => \&commit_ports_bugs,
-            "args" => undef
-        },
+# 20231130 we have moved away from the "patch-ready" convention.
+#       {
+#           "desc" => "Ports bugs, that are ready to be taken by a committer",
+#           "func" => \&commit_ports_bugs,
+#           "args" => undef
+#       },
         );
     foreach my $entry (@queries) {
         my ($criteria, $count, $buglist) = $entry->{func}($entry->{args});
