@@ -175,7 +175,7 @@ sub mfc_bugs {
     my %criteria = (
         "f1" => "flagtypes.name",
         "o1" => "anywordssubstr",
-        "v1" => "mfc-stable12? mfc-stable13? mfc-stable14? merge-quarterly?",
+        "v1" => "mfc-stable13? mfc-stable14? merge-quarterly?",
         "bug_status" => "__open__",
         );
     if ($critonly) {
