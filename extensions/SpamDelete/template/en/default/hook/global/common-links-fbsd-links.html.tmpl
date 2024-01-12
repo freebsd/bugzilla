@@ -1,0 +1,6 @@
+[% RETURN UNLESS user.login %]
+[% RETURN UNLESS user.in_group(Bugzilla.params.spam_delete_group) %]
+<li>
+  <span class="separator"> | </span>
+  <a href="[% urlbase FILTER none %]page.cgi?id=searchspam.html">Spam</a>
+</li>
