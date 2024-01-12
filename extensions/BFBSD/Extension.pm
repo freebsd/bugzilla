@@ -102,7 +102,7 @@ sub bug_end_of_create {
 }
 
 # Hide certain internal components from non-committers so
-# normal users won't mis-categorize PRs 
+# normal users won't mis-categorize PRs
 sub template_before_process {
     my ($self, $args) = @_;
     my ($vars, $file) = @$args{qw(vars file)};
@@ -125,8 +125,8 @@ sub template_before_process {
 sub _adjust_mime_type {
     my $attachment = shift;
 
-    if (defined Bugzilla->input_params->{contenttypemethod}
-        && Bugzilla->input_params->{contenttypemethod} eq 'autodetect') {
+    if (!defined(Bugzilla->input_params->{contenttypemethod}) ||
+        (Bugzilla->input_params->{contenttypemethod} eq 'autodetect')) {
         my $mimetype = $attachment->{mimetype};
         if (($mimetype eq 'application/shar')
             || ($mimetype eq 'application/x-shar')) {
