@@ -73,15 +73,6 @@ sub bug_end_of_create {
     my $curuser = switch_to_automation();
     return if !defined($curuser);
 
-    # Bug 197683 - add some keywords automatically
-    # Check, if patch or regression is set in the topic.
-    if ($bug->short_desc =~ /\[patch\]|patch:/i) {
-        $bug->modify_keywords("patch", "add")
-    }
-    if ($bug->short_desc =~ /\[regression\]|regression:/i) {
-        $bug->modify_keywords("regression", "add")
-    }
-
     # Bug 196909 - add $arch CCs for ports bugs with
     # platform != (amd64, i386)
     # We only add CCs, if it is a individual port bug
