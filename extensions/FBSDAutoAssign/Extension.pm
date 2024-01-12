@@ -211,6 +211,8 @@ sub _update_bug {
         }
     }
 
+    $bug->update();
+
     # Switch the user session back.
     Bugzilla->set_user($curuser);
 }
@@ -233,7 +235,7 @@ sub _get_maintainer {
         chomp($maintainer);
         return $maintainer;
     } else {
-        warn("Port directory $portdir not found $!");
+        warn("Port directory $portdir not found");
     }
     return;
 }
