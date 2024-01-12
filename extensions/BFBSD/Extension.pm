@@ -65,7 +65,7 @@ sub config_modify_panels {
 }
 
 sub bug_end_of_create {
-    # Bug 196909 - Add freebsd-$arch for arch specific ports tickets
+    # Bug 196909 - Add $arch@freebsd.org for arch specific ports tickets
     my ($self, $args) = @_;
     my $bug = $args->{'bug'};
 
@@ -81,7 +81,7 @@ sub bug_end_of_create {
         if ($bug->rep_platform ne "amd64" && $bug->rep_platform ne "i386" &&
             $bug->rep_platform ne "Any") {
 
-            my $archuser = sprintf("freebsd-%s\@FreeBSD.org",
+            my $archuser = sprintf("%s\@FreeBSD.org",
                                    $bug->rep_platform);
             my $user = get_user($archuser, 1);
             if ($user) {
