@@ -6,12 +6,12 @@
 %]
 
 <div id="bugzilla-body">
-  <h1>Delete Spammers</h1>
+  <h1>Block Spammers</h1>
   <p>
     The following page lets you block users, who create unsolicited bug
-    reports, such as advertisements (aka spam). The users will be
-    blocked (not deleted), and all bugs reported filed by them will be
-    deleted from [% terms.Bugzilla %].
+    reports, such as advertisements (AKA spam). The users will be
+    blocked (not deleted), and all bugs reported and comments posted
+    by them will be marked as spam.
   </p>
   <div id="search">
     <form action="page.cgi" method="get">
@@ -30,13 +30,14 @@
   </div>
 [% IF Bugzilla.cgi.param("user") %]
   <div>
-    <p>The following bugs were filed by [% Bugzilla.cgi.param("user") FILTER html %] and will be deleted.</p>
+    <p>The following bugs were filed or commented by [% Bugzilla.cgi.param("user") FILTER html %] and will be marked as spam.</p>
     <table id="deletebugs">
       <thead>
         <tr class="header">
           <th>Id</th>
           <th>Product</th>
           <th>Component</th>
+          <th>Reporter</th>
           <th class="expand">Description</th>
         </tr>
       </thead>
@@ -46,7 +47,8 @@
           <td><a href="show_bug.cgi?id=[% bug.0 %]">[% bug.0 %]</a></td>
           <td>[% bug.1 %]</td>
           <td>[% bug.2 %]</td>
-          <td><a href="show_bug.cgi?id=[% bug.0 %]">[% bug.3 %]</a></td>
+          <td>[% bug.3 %]</td>
+          <td><a href="show_bug.cgi?id=[% bug.0 %]">[% bug.4 %]</a></td>
         </tr>
 [% END %]
       </tbody>
@@ -60,7 +62,6 @@
       <input type="hidden" name="user"
              value="[% Bugzilla.cgi.param("user") %]" />
       <input type="submit" name="action" value="Block User" />
-      <input type="submit" name="action" value="Block and Delete" />
     </form>
 
   </div>
