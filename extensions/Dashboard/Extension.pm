@@ -118,7 +118,7 @@ sub _predefined_queries {
             "args" => undef
         },
         {
-            "desc" => "Ports bugs, that do not have been looked at yet",
+            "desc" => "Ports bugs that have not been looked at yet",
             "func" => \&new_ports_bugs,
             "args" => undef
         },
