@@ -22,6 +22,7 @@ sub should_handle {
 
     # Sourceforge issues have the form of
     # https://sourceforge.net/p/<project>/bugs/<number>/
+    # In theory, Bugzilla claims that it handles these natively.
     return (lc($uri->authority) eq "sourceforge.net"
             && $uri->path =~ m|[^/]+/[^/]+/bugs/\d+|i) ? 1 : 0;
 }
