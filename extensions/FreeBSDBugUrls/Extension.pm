@@ -12,6 +12,7 @@ use constant MORE_SUB_CLASSES => qw(
     Bugzilla::Extension::FreeBSDBugUrls::Phabricator
     Bugzilla::Extension::FreeBSDBugUrls::NetBSD
     Bugzilla::Extension::FreeBSDBugUrls::GoogleChromium
+    Bugzilla::Extension::FreeBSDBugUrls::GoogleIssueTracker
     Bugzilla::Extension::FreeBSDBugUrls::DragonFlyBSD
     Bugzilla::Extension::FreeBSDBugUrls::Gitlabs
 );
