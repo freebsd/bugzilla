@@ -92,24 +92,6 @@ sub bug_end_of_create {
     Bugzilla->set_user($curuser);
 }
 
-# Hide certain internal components from non-committers so
-# normal users won't mis-categorize PRs
-sub template_before_process {
-    my ($self, $args) = @_;
-    my ($vars, $file) = @$args{qw(vars file)};
-
-    return if $file ne 'bug/create/create.html.tmpl';
-    my $user = Bugzilla->user;
-    # Limit noise from mis-classified PRs by non-committer
-    # https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=198411
-    if (!$user->in_group('freebsd_committer')) {
-        $vars->{hide_components} = [
-            'Package Infrastructure',
-            'Ports Framework'
-        ];
-    }
-}
-
 # Auto-correct mimetypes for better usability
 # users prefer to view plain version of file in the browser
 # not download it
