@@ -16,7 +16,7 @@ sub template_before_process {
     my $user = Bugzilla->user;
     # Limit noise from mis-classified PRs by non-committer
     # https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=198411
-    if (!$user->in_group('freebsd_committe')) {
+    if (!$user->in_group('freebsd_committer')) {
         $vars->{hide_components} = [
             'Package Infrastructure'
         ];
