@@ -18,8 +18,7 @@ sub template_before_process {
     # https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=198411
     if (!$user->in_group('freebsd_committe')) {
         $vars->{hide_components} = [
-            'Package Infrastructure',
-            'Ports Framework'
+            'Package Infrastructure'
         ];
     }
 }
