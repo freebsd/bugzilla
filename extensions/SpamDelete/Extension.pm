@@ -14,7 +14,39 @@ use Bugzilla::User;
 use Bugzilla::Util;
 use Bugzilla::Extension::BFBSD::Helpers;
 
+use Date::Parse;
+use experimental 'smartmatch';
+
 our $VERSION = '0.1.0';
+my @WHITELIST = qw(
+    github.com
+    bugs.freebsd.org
+    freebsd.org
+    forums.freebsd.org
+    git.freebsd.org
+    cgit.freebsd.org
+    reviews.freebsd.org
+    lists.freebsd.org
+    bugs.freebsd.org
+    docs.freebsd.org
+    www.freebsd.org
+    wiki.freebsd.org
+    svn.freebsd.org
+    security.freebsd.org
+    svnweb.freebsd.org
+    download.freebsd.org
+    gnu.org
+    www.gnu.org
+    bitbucket.org
+    bz-attachments.freebsd.org
+);
+
+sub is_white_listed {
+    my $url = shift;
+    $url = lc($url);
+    $url =~ s@^https?://([^/]*).*@$1@;
+    return ($url ~~ @WHITELIST);
+}
 
 sub install_update_db {
     my ($self, $args) = @_;
@@ -32,7 +64,7 @@ sub page_before_template {
     my ($self, $args) = @_;
     my $page = $args->{page_id};
 
-    if ($page ne "searchspam.html" && $page ne "deletespam.html") {
+    if ($page ne "searchspam.html" && $page ne "deletespam.html" && $page ne "listsuspects.html") {
         return;
     }
 
@@ -46,25 +78,116 @@ sub page_before_template {
     }
     if ($page eq "searchspam.html") {
         _search_user($args);
+    } elsif ($page eq "listsuspects.html") {
+        _list_suspects($args);
     } elsif ($page eq "deletespam.html") {
-        _block_and_delete($args);
+        _block($args);
     }
+}
+
+sub _get_comments_with_link {
+    my $dbh = Bugzilla->dbh;
+    my $input = Bugzilla->input_params;
+
+    my $only_suspects = 0;
+    my $time_limit = "(bug_when > NOW() - INTERVAL '2 weeks')";
+    my @bind;
+    if (defined($input->{year})) {
+        if ($input->{year} =~ m/^(\d+)$/) {
+            push @bind, $1;
+            $time_limit = "(bug_when > NOW() - INTERVAL '7 years')";
+            $time_limit = "(EXTRACT(YEAR from bug_when) = ?)";
+            $only_suspects = 1;
+        }
+    }
+    my $sth = $dbh->prepare("
+        SELECT bug_id, comment_id, who, login_name, bug_when, thetext
+        FROM longdescs JOIN profiles ON (userid = who)
+        WHERE $time_limit 
+            AND (thetext ilike '%http://%' or thetext ilike '%https://%')
+            AND NOT (login_name ilike '%\@freebsd.org')
+            AND (disabledtext = '')
+    ");
+    $sth->execute(@bind);
+
+    my $age_sth = $dbh->prepare("
+        SELECT profiles_when
+        FROM profiles_activity WHERE fieldid=30 and who=? LIMIT 1
+    ");
+
+    my @comments;
+    my %registered;
+    while (my($bug, $comment, $who, $login, $when, $text) = $sth->fetchrow_array) {
+        my @links;
+        while ($text =~ m@(https?://.*?)(?:\h|$)@mig) {
+            push @links, $1;
+        }
+        @links = grep { not is_white_listed($_) } @links;
+        next unless(@links);
+        if (!defined($registered{$who})) {
+            $registered{$who} = '';
+            $age_sth->execute($who);
+            if (my ($activity_when) = $age_sth->fetchrow_array) {
+                $registered{$who} = $activity_when;
+            }
+        }
+        my $age = 'Unknown';
+        my $suspect = 0;
+        if ($registered{$who} ne '') {
+            my $time_reg = str2time($registered{$who});
+            my $time_comment = str2time($when);
+            my $diff = $time_comment - $time_reg;
+            if ($diff < 3600) {
+                $age = int($diff/60);
+                $age .= ' minutes';
+                $suspect = 1;
+            }
+            elsif ($diff < 3600*24) {
+                $age = int($diff/3600);
+                $age .= ' hours';
+                $suspect = 1;
+            }
+            elsif ($diff < 3600*24*7) {
+                $age = int($diff/(3600*24));
+                $age .= ' days';
+            }
+            else {
+                $age = int($diff/(3600*24*7));
+                $age .= ' weeks';
+            }
+        }
+        next if ($only_suspects and not $suspect);
+        my $entry = {
+            'bug' => $bug,
+            'when' => $when,
+            'who' => $login,
+            'registered' => $registered{$who},
+            'age' => $age,
+            'suspect' => $suspect,
+            'links' => \@links
+        };
+        push @comments, $entry;
+    }
+
+    return [ sort { $b->{when} cmp $a->{when} } @comments ];
 }
 
 sub _get_bugs {
     my $spamuser = shift();
 
     my %criteria = (
-        "email1"         => $spamuser->login,
-        "emailreporter1" => "1",
-        "emailtype1"     => "exact",
+        "v1"           => $spamuser->login,
+        "f1"           => "commenter",
+        "o1"           => "equals",
+        "query_format" => "advanced",
     );
-    my $fields = [ "bug_id", "product", "component", "short_desc" ];
+    my $fields = [ "bug_id", "product", "component", "reporter", "short_desc" ];
     my $search = new Bugzilla::Search(
         "fields"          => $fields,
         "params"          => \%criteria,
         "user"            => Bugzilla->user,
-        "allow_unlimited" => 1
+        "allow_unlimited" => 1,
+        "order"           => ['bugs.bug_id desc']
     );
     return $search->data;
 }
@@ -87,7 +210,15 @@ sub _search_user {
     $vars->{bugs} = _get_bugs($spamuser);
 }
 
-sub _block_and_delete {
+sub _list_suspects {
+    my $args = shift();
+    my $vars = $args->{vars};
+    my $cgi = Bugzilla->cgi;
+
+    $vars->{comments} = _get_comments_with_link();
+}
+
+sub _block {
     my $args = shift();
     my $vars = $args->{vars};
     my $input = Bugzilla->input_params;
@@ -113,164 +244,18 @@ sub _block_and_delete {
 
     $vars->{spamuser} = $spamuser->login;
 
-    # Search all bugs from that user and delete them. If no backup
-    # directory is specified, we won't save any bug.
-    my $folder = Bugzilla->params->{spam_backupfolder};
-    my $datadir = bz_locations()->{"datadir"};
-    my $backups = "$datadir/$folder";
-    my $wantbackup = 1;
-    if (!defined($folder) || $folder eq "") {
-        $wantbackup = 0;
-    } else {
-        mkdir($backups, 0770);
-        # adjust the permissions, if the directory already exits
-        chmod(0770, $backups);
-    }
-
-    my @buglist;
-    if ($input->{action} eq "Block and Delete") {
-        my $bugs = _get_bugs($spamuser);
-        $vars->{bugs} = $bugs;
-        my @todelete;
-        foreach my $bug (@$bugs) {
-            # Check, if we can properly access all bugs.
-            my $del = new Bugzilla::Bug($bug->[0]);
-            if ($del->{error}) {
-                Bugzilla->set_user($curuser);
-                ThrowCodeError("bug_error", { bug => $del });
-            }
-            push(@todelete, $del);
-        }
-        if ($wantbackup == 1) {
-            # Save all bugs before we delete them. If one
-            # cannot be saved properly, we will error out without
-            # having deleted only a part.
-            foreach my $bug (@todelete) {
-                my $id = $bug->bug_id;
-                open(my $FH, '>', "$backups/spam_bug_$id");
-                _dump_bug($bug, $FH);
-                close($FH);
-            }
-        }
-        foreach my $bug (@todelete) {
-            push(@buglist, {
-                id   => $bug->bug_id,
-                desc => $bug->short_desc
-            });
-            $bug->remove_from_db();
-        }
-    }
-
     # Block the user
-    if ($input->{action} eq "Block and Delete" ||
-        $input->{action} eq "Block User") {
-        $spamuser->set_disabledtext(Bugzilla->params->{spam_disable_text});
+    if ($input->{action} eq "Block User") {
+        $spamuser->set_disabledtext('[SPAM] ' . Bugzilla->params->{spam_disable_text});
         $spamuser->update();
     }
 
-    _send_info($curuser->login, $spamuser->login, \@buglist);
+    _send_info($curuser->login, $spamuser->login);
     Bugzilla->set_user($curuser);
 }
 
-sub _pretty {
-    my $v = shift();
-    return "NULL" unless defined $v; # empty (null) values
-    return $v if ($v =~ /^[0-9]+\.?[0-9]+$/); # int or numeric
-    return "''" if $v eq ''; # empty strings
-    return Bugzilla->dbh->quote($v); # timestamps, strings, etc.
-}
-
-sub _dump {
-    my ($bug, $file, $table, $query) = @_;
-    my $data = Bugzilla->dbh->selectall_arrayref($query, undef, $bug->bug_id);
-    foreach my $rec (@$data) {
-        print($file "INSERT INTO $table VALUES(\n");
-        print($file "  " . join(",", map { _pretty($_) } @$rec) . "\n");
-        print($file ");\n");
-    }
-}
-
-sub _dump_bug {
-    my ($bug, $file) = @_;
-
-    print($file "BEGIN;\n");
-
-    _dump($bug, $file, "bugs", qq{
-        SELECT * from bugs WHERE bug_id = ?;
-    });
-    _dump_attachments($bug, $file);
-
-    _dump($bug, $file, "bug_group_map", qq{
-        SELECT * from bug_group_map WHERE bug_id = ?;
-    });
-    _dump($bug, $file, "bug_see_also", qq{
-        SELECT * from bug_see_also WHERE bug_id = ?;
-    });
-    _dump($bug, $file, "bug_tag", qq{
-        SELECT * from bug_tag WHERE bug_id = ?;
-    });
-    _dump($bug, $file, "bugs_activity", qq{
-        SELECT * from bugs_activity WHERE bug_id = ?;
-    });
-    _dump($bug, $file, "bugs_fulltext", qq{
-        SELECT * from bugs_fulltext WHERE bug_id = ?;
-    });
-    _dump($bug, $file, "cc", qq{
-        SELECT * from cc WHERE bug_id = ?;
-    });
-    _dump($bug, $file, "dependencies", qq{
-        SELECT * from dependencies WHERE blocked = ?;
-    });
-    _dump($bug, $file, "dependencies", qq{
-        SELECT * from dependencies WHERE dependson = ?;
-    });
-    _dump($bug, $file, "duplicates", qq{
-        SELECT * from duplicates WHERE dupe = ?;
-    });
-    _dump($bug, $file, "duplicates", qq{
-        SELECT * from duplicates WHERE dupe_of = ?;
-    });
-    _dump($bug, $file, "flags", qq{
-        SELECT * from flags WHERE bug_id = ?;
-    });
-    _dump($bug, $file, "keywords", qq{
-        SELECT * from keywords WHERE bug_id = ?;
-    });
-    _dump($bug, $file, "longdescs", qq{
-        SELECT * from longdescs WHERE bug_id = ?;
-    });
-
-    print($file "COMMIT;\n");
-}
-
-sub _dump_attachments {
-    my ($bug, $file) = @_;
-    my $dbh = Bugzilla->dbh;
-    my $attach = $dbh->selectall_arrayref(qq{
-        SELECT * FROM attachments WHERE bug_id = ?;
-    }, undef, $bug->bug_id);
-    foreach my $value (@$attach) {
-        my $id = @$value[0];
-
-        print($file "INSERT INTO attachments VALUES(\n");
-        print($file "  " . join(",", map { _pretty($_) } @$value) . "\n");
-        print($file ");\n");
-
-        my $data = $dbh->selectall_arrayref(qq{
-            SELECT id, encode(thedata, 'base64') FROM attach_data WHERE id = ?;
-        }, undef, $id);
-        foreach my $rec (@$data) {
-            my $id = @$rec[0];
-            my $val = @$rec[1];
-            print($file "INSERT INTO attach_data VALUES(\n");
-            print($file "  $id, decode('$val', 'base64')");
-            print($file ");\n");
-        }
-    }
-}
-
 sub _send_info {
-    my ($who, $spamuser, $buglist) = @_;
+    my ($who, $spamuser) = @_;
     my $mail = "
 From: bugzilla-noreply\@FreeBSD.org
 To: %s
@@ -278,26 +263,12 @@ Subject: Spammer blocked on %s
 
 Dear administrators,
 
-user %s blocked the potential spammer
+User %s blocked the potential spammer
 %s on %s.
-";
-    if (scalar(@$buglist) > 0) {
-        $mail .= "
-The following bugs were deleted:
 
-    Bug Id | Description
------------+--------------------------------------------------------------
+User's PRs/comments:
+%spage.cgi?id=searchspam.html&action=search&user=%s
 ";
-        my $TBLROW = "%10s | %-60.59s\n";
-        foreach my $bug (@$buglist) {
-            $mail .= sprintf($TBLROW, $bug->{id}, $bug->{desc});
-        }
-        $mail .= "\n";
-    } else {
-        $mail .= "
-No bugs were deleted.
-";
-    }
 
     my $to = Bugzilla->params->{maintainer};
     my @contacts = split(",", Bugzilla->params->{spam_contacts});
@@ -312,8 +283,11 @@ No bugs were deleted.
         Bugzilla->params->{urlbase},
         $who,
         $spamuser,
-        Bugzilla->params->{urlbase}
+        Bugzilla->params->{urlbase},
+        Bugzilla->params->{urlbase},
+        url_quote($spamuser),
     );
+
     MessageToMTA($mailmsg, 1);
 }
 

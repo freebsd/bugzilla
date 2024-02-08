@@ -1,0 +1,9 @@
+[% IF user.id %]
+<tr>
+  <td class="field_label">Reporter:
+  </td>
+  <td>
+    [% bug.reporter.identity FILTER html %]
+  </td>
+</tr>
+[%- END -%]

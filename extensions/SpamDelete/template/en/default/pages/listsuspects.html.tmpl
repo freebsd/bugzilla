@@ -1,0 +1,43 @@
+[% PROCESS global/variables.none.tmpl %]
+[% PROCESS global/header.html.tmpl
+   title = "Comments With Links"
+   style_urls = [ "extensions/SpamDelete/web/style.css",
+                  "skins/standard/buglist.css"]
+%]
+
+<div id="bugzilla-body">
+  <h1>Comments with links</h1>
+  <p>
+    The following page lists comments posted that contain  links and 
+    were posted last two weeks.
+  </p>
+  <div>
+    <table id="suspects">
+      <thead>
+        <tr class="header">
+          <th>Who</th>
+          <th>When</th>
+          <th>Bug</th>
+          <th class="expand">Links</th>
+        </tr>
+      </thead>
+      <tbody>
+[% FOREACH comment = comments %]
+<tr class="[% loop.count() % 2 == 0 ? "bz_row_even" : "bz_row_odd" %] [% comment.suspect != 0 ? " bz_blocker" : "" %]">
+          <td>[% comment.who %]<br/>
+              Diff: [% comment.age %]<br/>
+              <a href="page.cgi?id=searchspam.html&user=[% comment.who %]">All comments</a>
+          </td>
+          <td>[% comment.when %]</td>
+          <td><a href="show_bug.cgi?id=[% comment.bug %]">[% comment.bug %]</a></td>
+          <td>
+[% FOREACH link = comment.links %]
+            [% link %]<br/>
+[% END %]
+          </td>
+        </tr>
+[% END %]
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -19,6 +19,7 @@ sub check_credentials {
         return $params;
     }
     $params->{bz_username} = $params->{username} . '@freebsd.org';
+    utf8::decode($params->{realname}) if (defined($params->{realname}));
     return $params;
 }
 

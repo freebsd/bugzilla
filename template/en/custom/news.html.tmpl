@@ -1,123 +1,93 @@
 [%# News file for the FreeBSD bugzilla instance #%]
 [% news = [
 {
-  date => '2015-02-28',
+  date => '2024-01-20',
   text => '<ul>
-  <li>The auto assigner will not add comments on adding CCs or reassignments
-    anymore. You can see such changes via the inline history
-    (<a href="userprefs.cgi">General Preferences</a>, <strong>When
-    viewing a bug, show all bug activity</strong>).</li>
-  <li>The <strong>When viewing a bug, show all bug activity</strong>
-    preference setting is enabled by default now.</li>
-  <li>Ports bugs containing <strong>[category/port]</strong> are
-    recognized again by the auto assigner.</li>
-  <li>The auto assigner will send mails to port maintainers not being
-    signed up for FreeBSD Bugzilla now, if a bug report is submitted.</li>
-  <li>If a ports bug is submitted for a platform, which is not i386 and not amd64,
-    the architecture-specific mailing list (e.g. freebsd-mips or freebsd-ia64)
-    is added to the bug report automatically now.</li>  
-  <li>The <strong>patch</strong> and <strong>regression</strong> keywords
-    are added automatically to bugs, if the title of the bug contains
-    <strong>[patch]</strong> or <strong>patch:</strong> (likewise for
-    regression) on submission.</li>
-  <li>The comment box features a brief editing help now.</li>
-  <li>A bug, which prevented requesting or granting
-    <strong>maintainer-approval</strong> flags on attachments has been
-    fixed</li>
-  <li>The <strong>My Requests</strong> overview was replaced with two
-    lists of (active) requests in the
-    <a href="page.cgi?id=dashboard.html">Dashboard</a>.</li>
+  <li>As an experiment, the flag "needs-errata" has been created.  Set this
+    to + to ask Release Engineering or Secteam to evaluate whether an
+    <a href="https://www.freebsd.org/security/notices/">Errata Notice</a>
+    should be created for an existing release.</li>
   </ul>'
 },
 {
-date => '2014-12-23',
-text => '<ul>
-<li>Products and Components in the issue tracker have been extensively
-modified, including new, renamed and moved items. You can familiarize
-yourself with the new categorization structure in
-<a href="query.cgi?format=advanced">Advanced Search</a>
-</li></ul>'
-},
-{
-  date => '2014-12-21',
+  date => '2023-12-17',
   text => '<ul>
-<li>An inline history extension has been rolled out, which displays the changes
-to a bug chronologically between the comments. You can enable it in the
-<a href="userprefs.cgi">General Preferences</a> via the <strong>When viewing a
-bug, show all bug activity</strong> knob.</li>
-</ul>'
+  <li>The weekly reminder script was belatedly updated to:
+    <ul>
+      <li>deselect mfc-stable8 through 11.</li>
+      <li>select mfc-stable12 through 14.</li>
+    </ul> 
+  <li>The Dashboard MFC query was belatedly fixed as above.</li>
+  <li>Note that mfc-stable12 will be removed 20240101.</li>
+  </ul>'
 },
 {
-  date => '2014-11-28',
+  date => '2023-11-30',
   text => '<ul>
-  <li>The auto assigner has been updated to fix some minor issues
-    with detecting ports and to add <strong>games@</strong> as CC for
-    unmaintained ports from the <strong>games/</strong> category.</li>
-</ul>'
+    <li>A stale query was removed from the Dashboard (PR 215844).</li>
+    <li><code>max_search_results</code> was updated from 10000 to 12500.
+      This was limiting the totals from certain queries.</li>
+  </ul>'
 },
 {
-  date => '2014-11-22',
-  text => '<p>The status switches were reworked to simplify
-    workflows:</p>
-<ul>
-  <li><strong>Needs Triage</strong> has become <strong>New</strong></li>
-  <li><strong>Aproval Needed</strong> and <strong>Feedback
-    Needed</strong> have been removed. Use
-    the <strong>maintainer-feedback</strong> flag instead.</li>
-  <li><strong>In Discussion</strong> has been renamed to <strong>In
-  Progress</strong>.</li>
-  <li><strong>Needs MFC</strong> has ben removed. Use the
-    <strong>mfc-stableX</strong> and <strong>merge-quarterly</strong>
-    flags instead.</li>
-  <li><strong>Patch Ready</strong> has been removed. Use
-  the <strong>patch-ready</strong> keyword instead.</li>
-  <li><strong>Issue Resolved</strong> and <strong>Timeout</strong> have
-    become <strong>Closed</strong>.</li>
-</ul>
-<p>Please check your saved queries and report charts. Other changes:</p>
-<ul>
-  <li>Some minor styling issues with the CSS have been fixed.</li>
-</ul>
-  '
-},
-{
-  date => '2014-11-01',
+  date => '2023-08-30',
   text => '<ul>
-  <li>A minor formatting issue with the SVN and review links was fixed, so that
-newline characters are not removed anymore.
-  </li>
-  <li>The default resolution entry "---" in the
-    <a href="query.cgi?format=advanced">Advanced Search</a> was removed.
-</ul>'
+  <li>To reflect the prelease state of FreeBSD 14.0, the following were
+    done:
+    <ul>
+      <li>Version 14.0-STABLE of product Base System was created.</li>
+      <li>Version 15.0-CURRENT of product Base System was created.</li>
+      <li>The flag type mfc-stable14 was created.</li>
+    </ul>
+  <li>As support for them has ended, Base System versions 12.0-*, 12.1-*,
+    12.2-*, 12.3-*, 13.0-*, and 13.1-* were disabled for new bugs.</li>
+  </ul>'
 },
 {
-  date => '2014-10-07',
+  date => '2021-01-24',
   text => '<ul>
-  <li>A minor issue with the <strong>Bugs waiting for feedback</strong> query
-    on the <a href="page.cgi?id=dashboard.html">Dashboard</a> has been fixed.</li>
-</ul>'
+  <li>To reflect the prelease state of FreeBSD 13.0, the following were
+    done: 
+    <ul>
+      <li>Version 13.0-STABLE of product Base System was created.</li>
+      <li>The flag type mfc-stable13 was created.</li>
+    </ul>
+  <li>As support for them has ended, Base System versions 12.0-RELEASE 
+    and 12.0-STABLE were disabled for new bugs.</li>
+  <li>Hardware value sparc64 has been disabled for new bugs.</li>
+  </ul>'
 },
 {
-  date => '2014-09-29',
+  date => '2020-07-12',
   text => '<ul>
-  <li>A new <a href="page.cgi?id=dashboard.html">Dashboard</a>
-    page has been added. It provides useful metrics and predefined searches
-    for various bug types. You can reach it from the link bars at the top or
-    bottom.
-  </li>
-  <li>Links to commits of the different SVN repositories can be embedded in
-    comments now. They work similar to bug or comment links using a
-    <strong>repotype XXXX</strong> syntax. Valid repotype values are
-    <ul><li><strong>ports</strong> for ports commits</li>
-      <li><strong>base</strong> for base system commits and</li>
-      <li><strong>doc</strong> for documentation commits</li>
-      <li><strong>review</strong> for links
-      to <a href="https://reviews.FreeBSD.org">reviews.FreeBSD.org</a> - those
-      must have a leading <strong>D</strong>, e.g. <strong>review
-      D123</strong>.</li>
+  <li>In order to lay the groundwork for future changes/improvements,
+    and to make it easier to search for things that are not assigned,
+    we have modified the <code>Real Name</code> of all bugzilla accounts
+    that are default assignees as such:<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<code>Assignee: freebsd-net (Nobody)</code>.<br>
+    This is to make it more obvious that default assignees are assigned to
+    <code>Nobody</code> and encourages self-assignment (to real people) to
+    make resolution more consistent.</li>
+  </ul>'
+},
+{
+  date => '2020-07-11',
+  text => '<ul>
+  <li>To help support the 202007 Bug Squash, all of the PRs containing
+    patches were audited so that:
+    <ul>
+      <li>Each attachment that has its <code>Patch</code> flag set has
+        been verified to contain a patch.</li>
+      <li>If an attachment filename ends in <code>.diff</code> or
+        <code>.patch</code>, its <code>Patch</code> flag has been
+        verified to be set.</li>
+      <li>The remaining attachment filenames end in <code>.shar</code>.</li>
     </ul>
   </li>
-</ul>'
+  <li>This officially obsoletes the use of the the <code>Keywords</code>
+    field value of <code>patch</code>.  This value had to be added by hand
+    and as a result was applied inconsistently.</li>
+  </ul>'
 },
   ]
 %]

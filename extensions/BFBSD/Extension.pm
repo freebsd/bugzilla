@@ -39,7 +39,9 @@ sub bug_check_can_change_field {
     my ($self, $args) = @_;
     if ($args->{'field'} eq 'keywords') {
         my $user = Bugzilla->user;
-        if (!$user->in_group('editbugs', $args->{'bug'}->product_id)) {
+        my $reporter = $args->{'bug'}->reporter->id;
+        if (($user->id != $reporter) &&
+            !$user->in_group('editbugs', $args->{'bug'}->product_id)) {
             push(@{ $args->{'priv_results'} }, PRIVILEGES_REQUIRED_EMPOWERED);
             return;
         }
@@ -63,22 +65,13 @@ sub config_modify_panels {
 }
 
 sub bug_end_of_create {
-    # Bug 196909 - Add freebsd-$arch for arch specific ports tickets
+    # Bug 196909 - Add $arch@freebsd.org for arch specific ports tickets
     my ($self, $args) = @_;
     my $bug = $args->{'bug'};
 
     # Switch the user session
     my $curuser = switch_to_automation();
     return if !defined($curuser);
-
-    # Bug 197683 - add some keywords automatically
-    # Check, if patch or regression is set in the topic.
-    if ($bug->short_desc =~ /\[patch\]|patch:/i) {
-        $bug->modify_keywords("patch", "add")
-    }
-    if ($bug->short_desc =~ /\[regression\]|regression:/i) {
-        $bug->modify_keywords("regression", "add")
-    }
 
     # Bug 196909 - add $arch CCs for ports bugs with
     # platform != (amd64, i386)
@@ -88,7 +81,7 @@ sub bug_end_of_create {
         if ($bug->rep_platform ne "amd64" && $bug->rep_platform ne "i386" &&
             $bug->rep_platform ne "Any") {
 
-            my $archuser = sprintf("freebsd-%s\@FreeBSD.org",
+            my $archuser = sprintf("%s\@FreeBSD.org",
                                    $bug->rep_platform);
             my $user = get_user($archuser, 1);
             if ($user) {
@@ -97,6 +90,39 @@ sub bug_end_of_create {
         }
     }
     Bugzilla->set_user($curuser);
+}
+
+# Auto-correct mimetypes for better usability
+# users prefer to view plain version of file in the browser
+# not download it
+sub _adjust_mime_type {
+    my $attachment = shift;
+
+    if (!defined(Bugzilla->input_params->{contenttypemethod}) ||
+        (Bugzilla->input_params->{contenttypemethod} eq 'autodetect')) {
+        my $mimetype = $attachment->{mimetype};
+        if (($mimetype eq 'application/shar')
+            || ($mimetype eq 'application/x-shar')) {
+            $attachment->{mimetype} = 'text/plain';
+        }
+        elsif (($mimetype eq 'text/x-patch')
+            || ($mimetype eq 'text/x-diff')) {
+            $attachment->{mimetype} = 'text/plain';
+            $attachment->{ispatch} = 1;
+        }
+        elsif ($mimetype =~ m#text/.*#) {
+            $attachment->{mimetype} = 'text/plain';
+        }
+    }
+}
+
+sub object_end_of_create {
+    my ($self, $args) = @_;
+    my $class = $args->{'class'};
+    my $object = $args->{'object'};
+    if ($class->isa('Bugzilla::Attachment')) {
+        _adjust_mime_type($object);
+    }
 }
 
 __PACKAGE__->NAME;
