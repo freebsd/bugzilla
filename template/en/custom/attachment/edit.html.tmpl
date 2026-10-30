@@ -21,6 +21,7 @@
   title = title
   header = header
   subheader = subheader
+  generate_api_token = 1
   doc_section = "using/editing.html#attachments"
   javascript_urls = ['js/attachment.js', 'js/field.js']
   style_urls = ['skins/standard/bug.css']
@@ -271,9 +272,10 @@
         [% END %]
         <div id="attachment_flags">
           [% IF attachment.flag_types.size > 0 %]
-              [%# Bug 197656 - attachment flags can not be set without editbugs permission %]
-              [% PROCESS "flag/list.html.tmpl" flag_types = attachment.flag_types %]
-
+              [% PROCESS "flag/list.html.tmpl" flag_types = attachment.flag_types
+                                               read_only_flags = !can_edit
+              %]
+     
           [% END %]
         </div>
 

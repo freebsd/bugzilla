@@ -65,8 +65,8 @@ my $openbugs = $dbh->selectall_arrayref(
     $mfcquery,
     undef,
     'merge-quarterly',
-    'mfc-stable13',
-    'mfc-stable14');
+    'mfc-stable14',
+    'mfc-stable15');
 
 my $kwdquery = q{
 SELECT DISTINCT

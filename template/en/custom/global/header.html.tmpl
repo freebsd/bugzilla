@@ -20,6 +20,7 @@
   # style_urls: list. List of URLs to CSS style sheets.
   # message: string. A message to display to the user. May contain HTML.
   # atomlink: Atom link URL, May contain HTML
+  # generate_api_token: generate a token which can be used to make authenticated webservice calls
   #%]
 
 [% IF message %]
@@ -31,7 +32,9 @@
   header_addl_info = ""
   onload = ""
   style_urls = []
+  javascript_urls = []
   yui = []
+  generate_api_token = 0
 %]
 
 [% SET yui_css = {
@@ -84,6 +87,8 @@
     [% IF Param('utf8') %]
       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     [% END %]
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
     [% SET yui = yui_resolve_deps(yui, yui_deps) %]
 
@@ -175,7 +180,7 @@
                 version_required:
                     "You must select a Version for this [% terms.bug %]."
             }
-            [% IF javascript_urls.containsany(['js/bug.js', 'js/field.js', 'js/comment-tagging.js']) %]
+            [% IF generate_api_token %]
               , api_token: '[% get_api_token FILTER js FILTER html %]'
             [% END %]
         };
@@ -230,10 +235,7 @@
       [% END %]
     </div>
 
-    <div id="common_links">
-      [% PROCESS "global/common-links.html.tmpl" qs_suffix = "_top" %]
-    </div>
-
+    [% USE Bugzilla %]
     [% IF Bugzilla.languages.size > 1 %]
       <div id="lang_links_container" class="bz_default_hidden">
         <ul class="links">
@@ -251,6 +253,10 @@
         </ul>
       </div>
     [% END %]
+
+    <div id="common_links">
+      [% PROCESS "global/common-links.html.tmpl" qs_suffix = "_top" %]
+    </div>
   </div>
 
   <div id="bugzilla-body">
